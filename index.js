@@ -1,6 +1,15 @@
 console.log("-STARTING-\n");
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+var loadedData = [];
+exports.loadedData = loadedData;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 const Util = require("./Util.js");
+
+global.Util = Util;
 
 const Discord = require("discord.js"),
 	ManageMutes = require("./core/ManageMutes.js"),
@@ -15,12 +24,9 @@ const client = new Discord.Client({
 
 global.Discord = Discord;
 global.client = client;
-global.Util = Util;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-var loadedData = [];
-exports.loadedData = loadedData;
 
 var dailyMutes = [];
 var dailyKicks = [];
