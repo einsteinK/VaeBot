@@ -1,3 +1,7 @@
+FileSys = require("fs");
+
+var muted;
+
 /*
 
 function (\w+)
@@ -344,7 +348,6 @@ exports.restartTimeouts = function() {
 FileSys.readFile(Util.mutesDir, "utf-8", (err, data) => {
 	if (err) throw err;
 	if (data.length > 0) muted = JSON.parse(data);
-
 	exports.muted = muted;
 
 	Object.defineProperty(muted, "__name", {
@@ -359,7 +362,6 @@ FileSys.readFile(Util.mutesDir, "utf-8", (err, data) => {
 	});
 	loadedData[muted] = true;
 	console.log("READY");
-	MuteManager.restartTimeouts();
 });
 
 FileSys.readFile(Util.histDir, "utf-8", (err, data) => {
