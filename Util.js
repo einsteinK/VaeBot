@@ -217,7 +217,7 @@ exports.getURLChecker = function() {
 			punct_regexp: /(?:[!?.,:;'"]|(?:&|&amp;)(?:lt|gt|quot|apos|raquo|laquo|rsaquo|lsaquo);)$/
 		};
 
-	exports.checkURLs = function( txt, options ) {
+	checkURLs = function( txt, options ) {
 		txt = txt.replaceAll("\\", "");
 		txt = txt.replaceAll("*", "");
 		txt = txt.replaceAll("_", "");
@@ -337,7 +337,7 @@ exports.getURLChecker = function() {
 	return checkURLs;
 };
 
-var checkURLs = getURLChecker();
+exports.checkURLs = exports.getURLChecker();
 
 exports.capitalize = function(str) {
 	str = String(str);
