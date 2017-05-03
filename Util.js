@@ -253,9 +253,26 @@ exports.pathRequire = (filePath) => {
 
 	console.log(file);
 
-	let dirName = /\w+$/.exec(file)[1];
+	let dirName = /(\w+)\/\w+\.js$/.exec(file)[1];
 
 	console.log(dirName);
+
+	if (dirName && index.commandTypes.hasOwnProperty(dirName)) {
+		for (var commandType in index.commandTypes) {
+			if (!index.commandTypes.hasOwnProperty(commandType)) continue;
+			var commandKey = index.commandTypes[commandType];
+			if (commandKey != "null") {
+				if (commandType == dirName) {
+					fileData[2][commandKey] = true;
+				} else {
+					fileData[2][commandKey] = false;
+				}
+			}
+		}
+	}
+
+	console.log(fileData[0]);
+	console.log(fileData[2]);
 };
 
 exports.checkStaff = function(guild, member) {
