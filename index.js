@@ -96,7 +96,7 @@ function setBriefing() {
 		var channel = client.channels.get("168744024931434498");
 		var guild = channel.guild;
 
-		console.log("Set daily briefing for " + t3*msToHours + " hours");
+		console.log("\nSet daily briefing for " + t3*msToHours + " hours\n");
 
 		setTimeout(function() {
 			var upField = {name: "​", value: "​", inline: false};
@@ -270,7 +270,7 @@ function setupSecurityVeil() {
 Cmds.initCommands();
 
 client.on("ready", () => {
-	console.log(`\nConnected as ${client.user.username}!`);
+	console.log(`\nConnected as ${client.user.username}!\n`);
 
 	if (madeBriefing == false) {
 		madeBriefing = true;
@@ -296,17 +296,17 @@ client.on("ready", () => {
 			setupSecurity(newGuild);
 
 			if (remaining == 0) {
-				console.log("Fetched all Guild members!");
+				console.log("\nFetched all Guild members!\n");
 				Mutes.restartTimeouts();
 			}
 		})
 		.catch(error => {
 			remaining--;
-			
+
 			console.log("E_READY_FETCH_MEMBERS: " + error);
 			
 			if (remaining == 0) {
-				console.log("Fetched all Guild members!");
+				console.log("\nFetched all Guild members!\n");
 				Mutes.restartTimeouts();
 			}
 		});
