@@ -198,18 +198,16 @@ function setupSecurity(guild) {
 	var sendRole = Util.getRole("SendMessages", guild);
 	var guildId = guild.id;
 	var guildName = guild.name;
-
-<<<<<<< HEAD
+	
 	console.log("Setting up security for " + guild.name + " (" + guild.members.size + " members)");
-=======
-	console.log("Setting up security for " + guild.name);
->>>>>>> 5eb6afe... Fix for SendMessages not being given
 
-	guild.members.forEach(member => {
-		var memberId = member.id;
-		var memberName = Util.getFullName(member);
+	if (sendRole) {
+		console.log("Setting up security for " + guild.name + " (" + guild.members.size + " members)");
 
-		if (sendRole) {
+		guild.members.forEach(member => {
+			var memberId = member.id;
+			var memberName = Util.getFullName(member);
+
 			var isMuted = Mutes.checkMuted(memberId, guild);
 
 			if (isMuted) {
@@ -225,8 +223,8 @@ function setupSecurity(guild) {
 					console.log("Assigned SendMessages to old member " + memberName);
 				}
 			}
-		}
-	});
+		});
+	}
 }
 
 function setupSecurityVeil() {
