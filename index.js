@@ -199,7 +199,11 @@ function setupSecurity(guild) {
 	var guildId = guild.id;
 	var guildName = guild.name;
 
+<<<<<<< HEAD
 	console.log("Setting up security for " + guild.name + " (" + guild.members.size + " members)");
+=======
+	console.log("Setting up security for " + guild.name);
+>>>>>>> 5eb6afe... Fix for SendMessages not being given
 
 	guild.members.forEach(member => {
 		var memberId = member.id;
