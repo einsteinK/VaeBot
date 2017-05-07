@@ -511,6 +511,11 @@ client.on("messageUpdate", (oldMsgObj, newMsgObj) => {
 
 exports.lockChannel = null;
 
+exports.calmSpeed = 7000;
+exports.slowChat = {};
+exports.slowInterval = {};
+exports.chatQueue = {};
+
 client.on("voiceStateUpdate", (oldMember, member) => {
 	var oldChannel = oldMember.voiceChannel; // May be null
 	var newChannel = member.voiceChannel; // May be null
@@ -585,11 +590,20 @@ client.on("message", msgObj => {
 
 	var contentLower = content.toLowerCase();
 
-	var isStaff = (guild && speaker) ? isStaff = Util.checkStaff(guild, speaker) : authorId == vaebId;
+	var isStaff = (guild && speaker) ? Util.checkStaff(guild, speaker) : authorId == vaebId;
 
 	if (exports.blockedUsers[authorId]) {
 		msgObj.delete();
 		return;
+	}
+
+	if (!isStaff) {
+		for (var i = 0; i < exports.blockedWords.length; i++) {
+			if (contentLower.includes(exports.blockedWords[i].toLowerCase())) {
+				msgObj.delete();
+				return;
+			}
+		}
 	}
 
 	if (guild != null && contentLower.substr(0, 5) == "sudo " && authorId == vaebId) {
@@ -711,6 +725,11 @@ client.on("message", msgObj => {
 				isAuto: false
 			};
 		}
+	}
+
+	if (guild && exports.slowChat[guild.id] && author.bot == false && !isStaff) {
+		msgObj.delete();
+		exports.chatQueue[guild.id].push(msgObj);
 	}
 
 	Cmds.checkMessage(msgObj, speaker, channel, guild, content, contentLower, authorId, isStaff);
