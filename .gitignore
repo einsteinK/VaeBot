@@ -6,6 +6,13 @@ yarn.lock
 # Log files
 *.log
 
+# Data Storage
+data/autoroles.json
+data/history.json
+data/mutes.json
+data/playlist.json
+resources/music/
+
 # Testing
 Auth.js
 Test.js
