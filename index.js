@@ -326,6 +326,8 @@ client.on("disconnect", closeEvent => {
 client.on("guildMemberRemove", member => {
 	var guild = member.guild;
 
+	Events.emit(guild, "UserLeave", member);
+
 	var sendLogData = [
 		"User Left",
 		guild,
@@ -394,6 +396,8 @@ client.on("guildMemberAdd", member => {
 	//if (memberId == "208661173153824769") member.setNickname("<- weird person");
 	//if (memberId == "264481367545479180") member.setNickname("devourer of penis");
 
+	Events.emit(guild, "UserJoin", member);
+
 	var sendLogData = [
 		"User Joined",
 		guild,
@@ -424,6 +428,7 @@ client.on("guildMemberUpdate", (oldMember, member) => {
 			if (member.id == "214047714059616257" && (nowRole.id == "293458258042159104" || nowRole.id == "284761589155102720")) {
 				member.removeRole(nowRole);
 			}
+
 			if (nowRole.name == "SendMessages" && Mutes.checkMuted(member.id, guild)) {
 				member.removeRole(nowRole);
 				console.log("Force re-muted " + Util.getName(member) + " (" + member.id + ")");
@@ -437,6 +442,8 @@ client.on("guildMemberUpdate", (oldMember, member) => {
 				];
 				Util.sendLog(sendLogData, colUser);
 			}
+
+			Events.emit(guild, "UserRoleAdd", member, nowRole);
 		});
 	}
 
@@ -456,6 +463,8 @@ client.on("guildMemberUpdate", (oldMember, member) => {
 				];
 				Util.sendLog(sendLogData, colUser);
 			}
+
+			Events.emit(guild, "UserRoleRemove", member, nowRole);
 		});
 	}
 
@@ -464,6 +473,8 @@ client.on("guildMemberUpdate", (oldMember, member) => {
 		//if (member.id == "264481367545479180" && nowNick != "devourer of penis") member.setNickname("devourer of penis");
 		// if (member.id == selfId && nowNick != null && nowNick != "") member.setNickname("");
 		// if (member.id == vaebId && nowNick != null && nowNick != "") member.setNickname("");
+		Events.emit(guild, "UserNicknameUpdate", member, previousNick, nowNick);
+
 		var sendLogData = [
 			"Nickname Updated",
 			guild,
@@ -481,7 +492,7 @@ client.on("messageUpdate", (oldMsgObj, newMsgObj) => {
 	var channel = newMsgObj.channel;
 	if (channel.name == "vaebot-log") return;
 	var guild = newMsgObj.guild;
-	var speaker = newMsgObj.member;
+	var member = newMsgObj.member;
 	var author = newMsgObj.author;
 	var content = newMsgObj.content;
 	var contentLower = content.toLowerCase();
@@ -496,6 +507,8 @@ client.on("messageUpdate", (oldMsgObj, newMsgObj) => {
 			return;
 		}
 	}
+
+	Events.emit(guild, "MessageUpdate", member, channel, oldContent, content);
 
 	if (oldContent != content) {
 		var sendLogData = [
@@ -547,7 +560,7 @@ client.on("messageDelete", msgObj => {
 	if (msgObj == null) return;
 	var channel = msgObj.channel;
 	var guild = msgObj.guild;
-	var speaker = msgObj.member;
+	var member = msgObj.member;
 	var author = msgObj.author;
 	var content = msgObj.content;
 	var contentLower = content.toLowerCase();
@@ -555,6 +568,8 @@ client.on("messageDelete", msgObj => {
 	var msgId = msgObj.id;
 
 	if (author.id == vaebId) return;
+
+	Events.emit(guild, "MessageDelete", member, channel, content);
 
 	var sendLogData = [
 		"Message Deleted",
@@ -744,6 +759,8 @@ client.on("message", msgObj => {
 	}
 
 	Cmds.checkMessage(msgObj, speaker, channel, guild, content, contentLower, authorId, isStaff);
+
+	Events.emit(guild, "MessageCreate", speaker, channel, msgObj, content);
 
 	if (author.bot == true) { //RETURN IF BOT
 		return;
