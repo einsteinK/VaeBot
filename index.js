@@ -265,6 +265,9 @@ function setupSecurityVeil() {
 
     guild.members.forEach((member) => {
         const memberId = member.id;
+
+        if (memberId === vaebId) return;
+
         const memberName = Util.getFullName(member);
         const veilMember = Util.getMemberById(memberId, veilGuild);
         if (!veilMember) {
@@ -833,7 +836,7 @@ client.on('message', (msgObj) => {
                                     if (curStamp.message !== latestMsg2) checkGrad2 = muteGrad;
                                     if (isFinal) break;
                                 }
-                                if (numNew === 0) {
+                                if (numNew <= 1) {
                                     console.log(`[2_] ${Util.getName(speaker)} was put on alert`);
                                     lastWarn[authorId] = newStamp;
                                     userStatus[authorId] = 2;
