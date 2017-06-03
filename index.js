@@ -753,7 +753,7 @@ const waitTime = 5.5;
 const endAlert = 15;
 
 exports.runFuncs.push((msgObj, speaker, channel, guild) => { // More sensitive
-    if (guild == null || msgObj == null || speaker.id === vaebId) return;
+    if (guild == null || msgObj == null || speaker == null || speaker.user.bot === true || speaker.id === vaebId) return;
 
     const contentLower = Util.replaceAll(msgObj.content.toLowerCase(), ' ', '');
     let triggered = false;
@@ -812,8 +812,6 @@ client.on('message', (msgObj) => {
         speaker = Util.getMemberById(selfId, guild);
         content = content.substring(5);
         contentLower = content.toLowerCase();
-    } else if (speaker == null) {
-        speaker = author;
     }
 
     if (exports.runFuncs.length > 0) {
@@ -940,7 +938,7 @@ client.on('message', (msgObj) => {
         // exports.chatQueue[guild.id].push(msgObj);
     }
 
-    Cmds.checkMessage(msgObj, speaker, channel, guild, content, contentLower, authorId, isStaff);
+    Cmds.checkMessage(msgObj, speaker || author, channel, guild, content, contentLower, authorId, isStaff);
 
     if (author.bot === true) { // RETURN IF BOT
         return;
