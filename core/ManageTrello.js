@@ -66,7 +66,7 @@ exports.findCard = function (targetId, callback) {
         console.log(data);
         console.log('--TRELLO FEEDBACK END--');
 
-        const ok = err == null;
+        const ok = err == null && data.cards.length > 0;
 
         callback(ok, ok ? data.cards[0] : err);
     });
@@ -91,6 +91,18 @@ exports.setDesc = function (cardId, cardDesc) {
 
     TrelloHandler.put(`/1/cards/${cardId}/desc`, {
         value: cardDesc,
+    }, (err, data) => {
+        console.log('--TRELLO FEEDBACK START--');
+        console.log(err);
+        console.log('--<>--');
+        console.log(data);
+        console.log('--TRELLO FEEDBACK END--');
+    });
+};
+
+exports.setDue = function (cardId, dueDate) {
+    TrelloHandler.put(`/1/cards/${cardId}/due`, {
+        value: dueDate,
     }, (err, data) => {
         console.log('--TRELLO FEEDBACK START--');
         console.log(err);
