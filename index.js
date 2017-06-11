@@ -207,7 +207,6 @@ exports.globalBan = {
     '201740276472086528': true,
     '75736018761818112': true,
     '123146298504380416': true,
-    '234426310934396928': true,
 };
 
 function securityFunc(guild, member, sendRoleParam) {
@@ -439,8 +438,7 @@ client.on('guildMemberAdd', (member) => {
         }
     }
 
-    // if (memberId == "208661173153824769") member.setNickname("<- weird person");
-    // if (memberId == "264481367545479180") member.setNickname("devourer of penis");
+    if (memberId === '280579952263430145') member.setNickname('<- mentally challenged');
 
     Events.emit(guild, 'UserJoin', member);
 
@@ -511,10 +509,7 @@ client.on('guildMemberUpdate', (oldMember, member) => {
     }
 
     if (previousNick !== nowNick) {
-        // if (member.id == "208661173153824769" && nowNick != "<- weird person") member.setNickname("<- weird person");
-        // if (member.id == "264481367545479180" && nowNick != "devourer of penis") member.setNickname("devourer of penis");
-        // if (member.id == selfId && nowNick != null && nowNick != "") member.setNickname("");
-        // if (member.id == vaebId && nowNick != null && nowNick != "") member.setNickname("");
+        if (member.id === '280579952263430145' && nowNick !== '<- mentally challenged') member.setNickname('<- mentally challenged');
         Events.emit(guild, 'UserNicknameUpdate', member, previousNick, nowNick);
 
         const sendLogData = [
@@ -817,7 +812,7 @@ client.on('message', (msgObj) => {
     let content = msgObj.content;
     const authorId = author.id;
 
-    if (guild.id !== '166601083584643072') return;
+    // if (guild.id !== '166601083584643072') return;
 
     if (content.substring(content.length - 5) === ' -del' && authorId === vaebId) {
         msgObj.delete();
@@ -855,7 +850,10 @@ client.on('message', (msgObj) => {
         }
     }
 
-    if (guild != null && author.bot === false && content.length > 0 && author.id !== vaebId && author.id !== guild.owner.id) {
+    let isMuted = false;
+    if (guild != null) isMuted = Mutes.checkMuted(author.id, guild);
+
+    if (guild != null && author.bot === false && content.length > 0 && !isMuted && author.id !== vaebId && author.id !== guild.owner.id) {
         if (!has.call(userStatus, authorId)) userStatus[authorId] = 0;
         if (!has.call(messageStamps, authorId)) messageStamps[authorId] = [];
         const nowStamps = messageStamps[authorId];
