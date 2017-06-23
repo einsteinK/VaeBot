@@ -256,7 +256,7 @@ function setupSecurity(guild) {
 }
 
 function setupSecurityVeil() {
-    /* const veilGuild = client.guilds.get('284746138995785729');
+    const veilGuild = client.guilds.get('284746138995785729');
     if (!veilGuild) return console.log('[ERROR_VP] Veil guild not found!');
     const guild = client.guilds.get('309785618932563968');
     if (!guild) return console.log('[ERROR_VP] New Veil guild not found!');
@@ -295,7 +295,7 @@ function setupSecurityVeil() {
         }
     });
 
-    return undefined; */
+    return undefined;
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////
@@ -389,7 +389,9 @@ client.on('guildMemberAdd', (member) => {
 
     console.log(`User joined: ${memberName} (${memberId}) @ ${guildName}`);
 
-    /* if (guildId === '309785618932563968') {
+    // test
+
+    if (guildId === '309785618932563968') {
         const veilGuild = client.guilds.get('284746138995785729');
         const veilBuyer = veilGuild.roles.find('name', 'Buyer');
         const newBuyer = guild.roles.find('name', 'Buyer');
@@ -417,7 +419,7 @@ client.on('guildMemberAdd', (member) => {
             .catch(error => console.log(`\n[E_AutoAddRole1] ${error}`));
             console.log('Awarded new member with Buyer role');
         }
-    } */
+    }
 
     if (has.call(exports.globalBan, memberId)) {
         member.kick()
