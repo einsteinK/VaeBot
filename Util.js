@@ -1638,6 +1638,68 @@ exports.updateMessageCache = (channel, speaker) => {
     });
 };
 
+exports.isMap = function (obj) {
+    return obj instanceof Map;
+};
+
+exports.deleteMessages = function (messages) {
+    let numMessages;
+    let firstMessage;
+
+    if (exports.isMap(messages)) {
+        numMessages = messages.size;
+        firstMessage = messages.first();
+    } else {
+        numMessages = messages.length;
+        firstMessage = messages[0];
+    }
+
+    if (numMessages < 1) {
+        console.log('You must have at least 1 message to delete');
+    }
+
+    if (numMessages === 1) {
+        firstMessage.delete()
+        .catch((err) => {
+            console.log(`[E_DeleteMessages1] ${err}`);
+        });
+    } else {
+        firstMessage.channel.bulkDelete(messages)
+        .catch((err) => {
+            console.log(`[E_DeleteMessages2] ${err}`);
+        });
+    }
+};
+
+async function fetchMessagesInner(channel, remaining, foundMessages, lastMessage) {
+    lastMessage = lastMessage != null ? lastMessage.id : undefined;
+
+    const messages = await channel.fetchMessages({ limit: Math.min(remaining, 99), before: lastMessage });
+
+    if (!messages || messages.size === 0) return foundMessages;
+
+    const messagesArr = messages.array();
+
+    for (let i = 0; i < messagesArr.length; i++) {
+        foundMessages.push(messagesArr[i]);
+    }
+
+    remaining -= messagesArr.length;
+
+    if (remaining <= 0) return foundMessages;
+
+    return fetchMessagesInner(channel, remaining, foundMessages, messagesArr[messagesArr.length - 1]);
+}
+
+exports.fetchMessages = async function (channel, numScan, checkFunc) {
+    if (!checkFunc) checkFunc = (() => true);
+
+    const scanMessages = await fetchMessagesInner(channel, numScan, [], null);
+    const foundMessages = scanMessages.filter(checkFunc);
+    console.log(`Num Messages Found: ${foundMessages.length}`);
+    return foundMessages;
+};
+
 exports.banMember = (member, moderator, reason) => {
     const memberId = member.id;
     const memberMostName = exports.getMostName(member);
