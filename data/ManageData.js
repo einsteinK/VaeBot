@@ -150,15 +150,7 @@ function emptyPromise() {
     });
 }
 
-const connection = index.MySQL.createConnection({
-    host: 'localhost',
-    user: 'vaebot',
-    password: index.dbPass,
-    database: 'veil',
-    multipleStatements: true,
-});
-
-exports.connection = connection;
+let connection;
 
 exports.query = function (statement, inputs) {
     return new Promise((resolve, reject) => {
@@ -170,7 +162,18 @@ exports.query = function (statement, inputs) {
 };
 
 exports.connect = function () {
+    connection = index.MySQL.createConnection({
+        host: 'localhost',
+        user: 'vaebot',
+        password: index.dbPass,
+        database: 'veil',
+        multipleStatements: true,
+    });
+
+    exports.connection = connection;
+
     return new Promise((resolve, reject) => {
+        console.log('[MySQL] Connecting...');
         connection.connect((err) => {
             if (err) return reject(err);
             return resolve();
@@ -297,6 +300,8 @@ exports.addRecord = function (guild, tableName, data) {
 };
 
 exports.connectInitial = function (dbGuilds) {
+    console.log('[MySQL] Initialising connection to database');
+
     exports.connect()
     .then(() => {
         console.log(`[MySQL] Connected as id ${connection.threadId}`);
