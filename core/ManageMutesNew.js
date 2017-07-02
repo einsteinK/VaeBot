@@ -21,7 +21,7 @@ exports.defaultMuteLength = 1800000;
 
 */
 
-function sendMuteMessage(guild, channel, userId, actionType, messageType, userMember, moderatorResolvable, moderatorMention, totalMutes, muteLength, reason, endStr) { // Send mute log, direct message, etc.
+function sendMuteMessage(guild, channel, userId, actionType, messageType, userMember, moderatorResolvable, moderatorMention, totalMutes, timeRemainingStr, reason, endStr) { // Send mute log, direct message, etc.
     // Will keep DM as text (rather than embed) to save send time
 
     const hasMember = userMember != null;
@@ -33,7 +33,7 @@ function sendMuteMessage(guild, channel, userId, actionType, messageType, userMe
                 { name: 'Username', value: memberMention },
                 { name: 'Mute Reason', value: reason },
                 { name: 'Mute Expires', value: endStr },
-                { name: 'Time Remaining', value: muteLength },
+                { name: 'Time Remaining', value: timeRemainingStr },
             ];
             Util.sendEmbed(channel, 'User Muted', null, Util.makeEmbedFooter(moderatorResolvable), Util.getAvatar(userMember), 0x00E676, sendEmbedFields);
         } else if (messageType === 'DM') {
@@ -43,7 +43,7 @@ function sendMuteMessage(guild, channel, userId, actionType, messageType, userMe
             outStr.push(`Guild: ${guild.name}`);
             outStr.push(`Reason: ${reason}`);
             outStr.push(`Mute expires: ${endStr}`);
-            outStr.push(`Time remaining: ${muteLength}`);
+            outStr.push(`Time remaining: ${timeRemainingStr}`);
             outStr.push('```');
             Util.print(userMember, outStr.join('\n'));
         } else if (messageType === 'Log') {
@@ -244,6 +244,7 @@ exports.addMute = async function (guild, channel, userResolvable, moderatorResol
     dateEnd.setTime(Date.now() + muteLength);
 
     const endStr = `${DateFormat(dateEnd, '[dd/mm/yyyy] HH:MM:ss')} GMT`;
+    const timeRemainingStr = Util.historyToString(muteLength);
 
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -255,13 +256,21 @@ exports.addMute = async function (guild, channel, userResolvable, moderatorResol
 
     // Add their mute to the database
 
-    Data.addRecord(guild, 'mutes', {
-        'user_id': userId, // VARCHAR(24)
-        'mod_id': moderatorId, // VARCHAR(24)
-        'mute_reason': reason, // TEXT
-        'end_tick': endTick, // BIGINT
-        'active': 1, // BIT
-    });
+    Data.updateRecords(guild, 'mutes', {
+        user_id: userId,
+    }, {
+        active: 0,
+    })
+    .then(() => {
+        Data.addRecord(guild, 'mutes', {
+            'user_id': userId, // VARCHAR(24)
+            'mod_id': moderatorId, // VARCHAR(24)
+            'mute_reason': reason, // TEXT
+            'end_tick': endTick, // BIGINT
+            'active': 1, // BIT
+        });
+    })
+    .catch(console.error);
 
     // Add mute timeout (and automatically remove any active timeouts)
 
@@ -273,9 +282,9 @@ exports.addMute = async function (guild, channel, userResolvable, moderatorResol
 
     // Send the relevant messages
 
-    sendMuteMessage(guild, channel, userId, 'Mute', 'Channel', userMember, moderatorResolvable, moderatorMention, totalMutes, muteLength, reason, endStr);
-    sendMuteMessage(guild, channel, userId, 'Mute', 'DM', userMember, moderatorResolvable, moderatorMention, totalMutes, muteLength, reason, endStr);
-    sendMuteMessage(guild, channel, userId, 'Mute', 'Log', userMember, moderatorResolvable, moderatorMention, totalMutes, muteLength, reason, endStr);
+    sendMuteMessage(guild, channel, userId, 'Mute', 'Channel', userMember, moderatorResolvable, moderatorMention, totalMutes, timeRemainingStr, reason, endStr);
+    sendMuteMessage(guild, channel, userId, 'Mute', 'DM', userMember, moderatorResolvable, moderatorMention, totalMutes, timeRemainingStr, reason, endStr);
+    sendMuteMessage(guild, channel, userId, 'Mute', 'Log', userMember, moderatorResolvable, moderatorMention, totalMutes, timeRemainingStr, reason, endStr);
 
     console.log('Completed addMute');
 
@@ -343,7 +352,7 @@ exports.unMute = async function (guild, channel, userResolvable, moderatorResolv
     // Update mute SQL record
 
     Data.updateRecords(guild, 'mutes', {
-        mute_id: muteId,
+        user_id: userId,
     }, {
         active: 0,
     });
