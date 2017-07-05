@@ -1401,7 +1401,7 @@ exports.getMemberByName = (name, guild) => {
     return strongest[1];
 };
 
-exports.getDataFromString = function (str, funcs, returnExtra) {
+function getDataFromStringInner(str, funcs, returnExtra) {
     const mix = str.split(' ');
     const baseStart = mix.length - 1;
     let start = baseStart;
@@ -1462,6 +1462,29 @@ exports.getDataFromString = function (str, funcs, returnExtra) {
     }
 
     return undefined;
+}
+
+exports.getDataFromString = function (str, funcSets, returnExtra) {
+    if (typeof funcSets[0] == 'function') return getDataFromStringInner(str, funcSets, returnExtra);
+
+    const mainData = getDataFromStringInner(str, funcSets[0], returnExtra);
+
+    if (!mainData) return mainData;
+
+    let lastExtra = mainData[funcSets[0].length];
+
+    for (let i = 1; i < funcSets.length; i++) {
+        if (!lastExtra || lastExtra.length == 0) break;
+        const nowData = getDataFromStringInner(lastExtra, funcSets[i], returnExtra);
+        if (nowData) {
+            for (let j = 0; j < funcSets[i].length; j++) mainData.push(nowData[j]);
+            lastExtra = nowData[funcSets[i].length];
+        }
+    }
+
+    mainData.push(lastExtra);
+
+    return mainData;
 };
 
 exports.clamp = function (num, minParam, maxParam) {
