@@ -1479,6 +1479,8 @@ exports.getDataFromString = function (str, funcSets, returnExtra) {
         if (nowData) {
             for (let j = 0; j < funcSets[i].length; j++) mainData.push(nowData[j]);
             lastExtra = nowData[funcSets[i].length];
+        } else {
+            for (let j = 0; j < funcSets[i].length; j++) mainData.push(null);
         }
     }
 
