@@ -87,6 +87,7 @@ exports.blockedUsers = {};
 exports.blockedWords = [];
 
 exports.runFuncs = [];
+exports.warnedImage = {};
 
 // //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -217,6 +218,7 @@ exports.globalBan = {
     '189687397951209472': true, // xCraySECx / Nico Nico
     '154255141317378050': true, // HighDefinition
     '157749388964265985': true, // Zetroxer
+    '280419231181307906': true, // Solarical
 };
 
 function securityFunc(guild, member, sendRoleParam) {
@@ -838,8 +840,8 @@ exports.runFuncs.push((msgObj, speaker, channel, guild) => { // More sensitive
     contentLower = contentLower.replace(/perfect/g, 'best');
     contentLower = contentLower.replace(/top/g, 'best');
     contentLower = contentLower.replace(/hack/g, 'exploit');
-    contentLower = contentLower.replace(/hax/g, 'exploit');
-    contentLower = contentLower.replace(/le?v.?l(?:\d|s|f)/g, 'exploit');
+    contentLower = contentLower.replace(/h\Sx/g, 'exploit');
+    contentLower = contentLower.replace(/le?v\S?l(?:\d|s|f)/g, 'exploit');
 
     let triggered = 0;
 
