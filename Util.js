@@ -1643,7 +1643,6 @@ exports.getDataFromString = function (str, funcSets, returnExtra) {
 
 function matchSet(str, funcSets, setIndex, data) {
     if (setIndex >= funcSets.length) {
-        data.extra = str;
         return true;
     }
     data.fail = Math.max(data.fail, setIndex);
@@ -1694,10 +1693,17 @@ exports.getDataFromString2 = function (str, funcSets, returnExtra) {
     const data = [];
     data.fail = 0;
     const done = [];
+    if (returnExtra) {
+        funcSets.push({
+            func(extra) {
+                return extra;
+            },
+            optional: true,
+        });
+    }
     const success = matchSet(str, funcSets, 0, data, done);
     data.success = success;
     if (success) {
-        if (!returnExtra) data.extra = undefined;
         for (let i = data.length; i < funcSets.length; i++) {
             data.push(undefined);
         }
@@ -1955,6 +1961,16 @@ exports.updateMessageCache = function (channel, speaker) {
             exports.sendDescEmbed(channel, 'Message Cache', 'Refreshed', exports.makeEmbedFooter(speaker), null, 0x00E676);
         }
     });
+};
+
+exports.isMember = function (userRes) {
+    if (userRes.user != null) return true;
+    return false;
+};
+
+exports.getUser = function (userRes) {
+    if (!userRes) return null;
+    return userRes.user || userRes;
 };
 
 exports.isMap = function (obj) {
