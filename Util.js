@@ -886,12 +886,12 @@ function chunkMessage(msg) {
     const baseChunkSize = exports.charLimit - leaveExtra;
 
     for (let i = 0; content; ++i, content = origChunks[i]) {
+        for (let j = 0; j < appendBeginning.length; j++) {
+            content = appendBeginning[j] + content;
+        }
+
         let chunk = content.substr(0, baseChunkSize);
         let leftOver;
-
-        for (let j = 0; j < appendBeginning.length; j++) {
-            chunk = appendBeginning[j] + chunk;
-        }
 
         appendBeginning = [];
 
@@ -925,6 +925,12 @@ function chunkMessage(msg) {
 
             chunk = chunkTemp;
             leftOver = content.substr(pivotEnd);
+
+            if (i == 1) {
+                console.log(chunkTemp);
+                console.log('---');
+                console.log(leftOver);
+            }
 
             break;
         }
