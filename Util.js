@@ -903,7 +903,7 @@ function chunkMessage(msg) {
             let pivotStart = chunk.lastIndexOf(splitChars); // exclusive
             let pivotEnd = pivotStart; // inclusive
 
-            if (!pivotStart) continue;
+            if (pivotStart == -1) continue;
 
             if (splitType == 1) { // Split End
                 pivotStart += splitChars.length;
@@ -914,14 +914,14 @@ function chunkMessage(msg) {
 
             const chunkTemp = chunk.substring(0, pivotStart);
 
-            if (chunkTemp.length <= baseChunkSize) continue;
+            if (chunkTemp.length <= leaveExtra) continue;
 
             if (splitChars == '```') { // Has to be closing a block
                 const numSets = (chunkTemp.match(new RegExp(exports.escapeRegExp(splitChars), 'g')) || []).length;
                 if (numSets % 2 == 1) continue;
             }
 
-            console.log(`Split on ${splitChars}`);
+            console.log(`Split on ${splitChars} @ ${pivotStart} @ ${pivotEnd}`);
 
             chunk = chunkTemp;
             leftOver = content.substr(pivotEnd);
