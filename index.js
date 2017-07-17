@@ -219,6 +219,7 @@ exports.globalBan = {
     '154255141317378050': true, // HighDefinition
     '157749388964265985': true, // Zetroxer
     '280419231181307906': true, // Solarical
+    '169261309353918464': true, // Slappy826
 };
 
 function securityFunc(guild, member, sendRoleParam) {
@@ -548,7 +549,7 @@ client.on('guildMemberUpdate', (oldMember, member) => {
     }
 });
 
-/*client.on('userUpdate', (oldUser, user) => {
+/* client.on('userUpdate', (oldUser, user) => {
     const oldUsername = oldUser.username;
     const newUsername = user.username;
 
@@ -777,7 +778,7 @@ const lastWarn = {};
 const checkMessages = 5; // (n)
 const warnGrad = 13.5; // Higher = More Spam (Messages per Second) | 10 = 1 message per second
 const sameGrad = 4;
-const muteGrad = 8;
+const muteGrad = 8; // 9
 const waitTime = 5.5;
 const endAlert = 40;
 
