@@ -1040,9 +1040,9 @@ client.on('message', (msgObj) => {
                     }
                 }
                 // Util.log("User: " + Util.getName(speaker) + " | Elapsed Since " + checkMessages + " Messages: " + elapsed + " | Gradient1: " + grad1);
-                if (grad1 >= checkGrad1) {
+                if (grad1 >= checkGrad1) { // Is spamming
                     if (userStatus[authorId] === 0) {
-                        Util.logc('AntiSpam1', `${Util.getName(speaker)} warned, gradient ${grad1} larger than ${checkGrad1}`);
+                        Util.logc('AntiSpam1', `[1] ${Util.getName(speaker)} warned, gradient ${grad1} larger than ${checkGrad1}`);
                         userStatus[authorId] = 1;
                         Util.print(channel, speaker.toString(), 'Warning: If you continue to spam you will be auto-muted');
                         setTimeout(() => {
@@ -1068,7 +1068,7 @@ client.on('message', (msgObj) => {
                                     if (isFinal) break;
                                 }
                                 if (numNew <= 1) {
-                                    Util.logc('AntiSpam1', `[2_] ${Util.getName(speaker)} was put on alert`);
+                                    Util.logc('AntiSpam1', `[2_] ${Util.getName(speaker)} stopped spamming and was put on alert`);
                                     lastWarn[authorId] = newStamp;
                                     userStatus[authorId] = 2;
                                     return;
@@ -1106,7 +1106,7 @@ client.on('message', (msgObj) => {
                         userStatus[authorId] = 0;
                     }
                 } else if (userStatus[authorId] === 2 && (stamp - lastWarn[authorId]) > (endAlert * 1000)) {
-                    Util.log(`${Util.getName(speaker)} ended their alert`);
+                    Util.logc('AntiSpam1', `[3] ${Util.getName(speaker)} ended their alert`);
                     userStatus[authorId] = 0;
                 }
             }
