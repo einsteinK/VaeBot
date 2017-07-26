@@ -1903,6 +1903,10 @@ exports.clamp = function (num, minParam, maxParam) {
     return Math.min(Math.max(num, min), max);
 };
 
+exports.noBlock = function (str) {
+    return `\`\`\`\n${str}\n\`\`\``;
+};
+
 exports.toBoolean = function (str) {
     const result = (typeof (str) === 'boolean' ? str : (str === 'true' || (str === 'false' ? false : undefined)));
     return result;
