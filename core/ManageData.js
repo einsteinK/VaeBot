@@ -316,6 +316,7 @@ exports.updateCache = async function (updateTableName) {
 };
 
 exports.getCache = function (guildId, tableName) {
+    // Util.logc('GetCache', tableName, !exports.cache[tableName]);
     if (!exports.cache[tableName]) return null;
     if (!exports.cache[tableName][guildId]) exports.cache[tableName][guildId] = {};
     return [exports.cache[tableName][guildId], exports.cache[tableName]._primaryKey];
@@ -534,7 +535,7 @@ exports.addRecord = function (guild, tableName, dataArr) { // DBFunc
         if (rowNum == 0) {
             const recordColumns = Object.keys(data);
 
-            for (const [column] of recordColumns) {
+            for (const column of recordColumns) {
                 columnStr.push(column);
                 updateColumnStr.push(`${column} = VALUES(${column})`);
             }
@@ -575,7 +576,7 @@ exports.addRecord = function (guild, tableName, dataArr) { // DBFunc
 
     Util.logc('AddRecord1', 'AddRecord');
     Util.logc('AddRecord1', queryStr);
-    Util.logc('AddRecord1', multiValueArr);
+    // Util.logc('AddRecord1', multiValueArr);
 
     return exports.query(queryStr, multiValueArr);
 };
