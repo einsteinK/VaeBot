@@ -46,14 +46,34 @@ global.Discord = require('discord.js');
 
 exports.YtInfo.setKey(Auth.youtube);
 
-Discord.GuildMember.prototype.getProp = function (p) {
+Discord.BaseGuildMember = Discord.GuildMember;
+
+class ExtendableProxy {
+    constructor(guild, data) {
+        this.OriginalGuildMember = new Discord.BaseGuildMember(guild, data);
+
+        return new Proxy(this, {
+            get: (object, key) => {
+                return this.OriginalGuildMember[key];
+            },
+            set: (object, key, value) => {
+                this.OriginalGuildMember[key] = value;
+                return value;
+            },
+        });
+    }
+}
+
+Discord.GuildMember = class extends ExtendableProxy {};
+
+/* Discord.GuildMember.prototype.getProp = function (p) {
     if (this[p] != null) return this[p];
     return this.user[p];
 };
 
 Discord.User.prototype.getProp = function (p) {
     return this[p];
-};
+}; */
 
 global.client = new Discord.Client({
     disabledEvents: ['TYPING_START'],
