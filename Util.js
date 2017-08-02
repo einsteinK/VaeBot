@@ -1075,7 +1075,7 @@ exports.sortPerms = function (permsArr) {
 };
 
 exports.getGuildRoles = function (guild) {
-    return guild.roles.sort((a, b) => b.position - a.position); // From highest to lowest
+    return Array.from(guild.roles.values()).sort((a, b) => b.position - a.position); // From highest to lowest
 };
 
 exports.getName = function (userResolvable) {
@@ -2019,7 +2019,7 @@ exports.isAdmin = function (member) {
     const highestRole = member.highestRole;
     const guildRolesFromTop = exports.getGuildRoles(member.guild);
 
-    for (let i = 0; i < guildRolesFromTop; i++) {
+    for (let i = 0; i < guildRolesFromTop.length; i++) {
         const role = guildRolesFromTop[i];
         if (/\bmod/g.test(role.name.toLowerCase())) {
             return false;
