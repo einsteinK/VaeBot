@@ -2219,6 +2219,7 @@ exports.addedProxies = {};
 let proxyId = 0;
 
 exports.addProxy = function (member) {
+    Util.log('Adding new proxy:');
     Util.log(`Adding proxy to ${String(member)}`);
     const oldPrototype = Object.getPrototypeOf(member);
 
