@@ -2215,7 +2215,6 @@ exports.fetchMessagesEx = function (channel, left, store, lastParam) {
         .then(messages => exports.onFetch(messages, channel, left, store));
 };
 
-exports.addedProxies = {};
 let proxyId = 0;
 
 exports.addProxy = function (member) {
