@@ -1557,37 +1557,30 @@ exports.getDiscriminatorFromName = (name) => {
     return discrim;
 };
 
-exports.getMemberByName = function (name, guild) { // [v2.0] Visible name match, real name match, length match, caps match, position match //
-    if (guild == null) return undefined;
-
-    const nameDiscrim = exports.getDiscriminatorFromName(name);
-    if (nameDiscrim) {
-        const namePre = name.substr(0, name.length - 5);
-        const member = guild.members.find(m => m.user.username === namePre && m.user.discriminator === nameDiscrim);
-        if (member) return member;
-    }
-
-    let removeUnicode = true;
-    const origName = name.trim();
-
 exports.getMemberByName = (name, guild) => {
     // [v2.0] Visible name match, real name match, caps match, length match, position match
     // [v3.0] einsteinK rewrote stuff and did some stuff, not sure what
 
+    name = name.replace(/[^\x00-\x7F]/g, '').trim();
+
+
     if (guild == null) return undefined;
     
     const removeUnicode = name.replace(/[^\0-\x7F]/g, '') == name;
-=======
+
     if (name.length == 0) {
         name = origName;
         removeUnicode = false;
     }
 
     const str2Lower = name.toLowerCase();
-
     const members = guild.members;
-
     let strongest = null;
+
+    if (str2Lower == 'vaeb') {
+        const selfMember = members.get(selfId);
+        if (selfMember) return selfMember;
+    }
 
     members.forEach((member) => {
         let realName = member.nickname != null ? member.nickname : exports.getName(member);
@@ -2280,6 +2273,49 @@ exports.mergeUser = function (member) {
     return true;
 };
 
+exports.resolveUser = function (guild, userResolvable, isMod) { // If user is moderator, userResolvable as text would be the system
+    const resolvedData = {
+        member: userResolvable,
+        id: userResolvable,
+        mention: userResolvable,
+        original: userResolvable,
+    };
+
+    let userType = 0; // Member
+    let system = false;
+
+    if (typeof userResolvable === 'string') {
+        if (exports.isId(userResolvable)) { // ID [IMPORTANT] This needs to be improved; as it is right now any number between 16 and 19 characters will be treated as an ID, when it could just be someone's name
+            userType = 1; // ID
+        } else {
+            userType = 2; // Name or System
+            system = isMod && userResolvable.match(/[a-z]/i); // When resolving moderator the only use of text should be when the moderator is the system.
+        }
+    }
+
+    exports.logc('Admin1', `User type: ${userType} (isMod ${isMod || false})`);
+
+    if (userType === 0) { // Member
+        resolvedData.id = userResolvable.id;
+        resolvedData.mention = userResolvable.toString();
+    } else if (userType === 1) { // ID
+        resolvedData.member = guild.members.get(userResolvable);
+        resolvedData.mention = resolvedData.member ? resolvedData.member.toString() : `<@${userResolvable}>`;
+    } else if (userType === 2) { // Name or System
+        if (system) { // VaeBot
+            resolvedData.member = guild.members.get(selfId);
+            resolvedData.id = selfId;
+        } else { // Name
+            resolvedData.member = exports.getMemberByMixed(userResolvable, guild);
+            if (!resolvedData.member) return 'User not found';
+            resolvedData.id = resolvedData.member.id;
+            resolvedData.mention = resolvedData.member.toString();
+        }
+    }
+
+    return resolvedData; // [Definite Values] ID: Always | Mention: Always | Member: All inputs except ID
+};
+
 exports.onFetch = function (messagesParam, channel, leftParam, store) {
     let messages = messagesParam;
     let left = leftParam;
@@ -2606,13 +2642,6 @@ exports.log = function (...args) {
     lastTag = null;
 };
 
-<<<<<<< HEAD
-exports.logn = function (...args) {
-    postOutString(args, false);
-    lastTag = null;
-};
-
-<<<<<<< HEAD
 exports.logc = function(...args) {
     const nowTag = String(args.splice(0, 1)).toLowerCase();
     const isNew = lastTag != nowTag;
