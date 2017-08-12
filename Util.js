@@ -1583,7 +1583,7 @@ exports.getMemberByName = (name, guild) => {
     let strongest = null;
 
     if (str2Lower == 'vaeb') {
-        const selfMember = members.get(selfId);
+        const selfMember = members.get(vaebId);
         if (selfMember) return selfMember;
     }
 
