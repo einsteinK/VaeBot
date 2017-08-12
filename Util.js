@@ -2300,8 +2300,10 @@ exports.resolveUser = function (guild, userResolvable, isMod) { // If user is mo
     let system = false;
 
     if (typeof userResolvable === 'string') {
-        if (exports.isId(userResolvable)) { // ID [IMPORTANT] This needs to be improved; as it is right now any number between 16 and 19 characters will be treated as an ID, when it could just be someone's name
+        const idMatch = exports.isId(userResolvable);
+        if (idMatch) { // ID [IMPORTANT] This needs to be improved; as it is right now any number between 16 and 19 characters will be treated as an ID, when it could just be someone's name
             userType = 1; // ID
+            resolvedData.id = idMatch;
         } else {
             userType = 2; // Name or System
             system = isMod && userResolvable.match(/[a-z]/i); // When resolving moderator the only use of text should be when the moderator is the system.
@@ -2314,8 +2316,8 @@ exports.resolveUser = function (guild, userResolvable, isMod) { // If user is mo
         resolvedData.id = userResolvable.id;
         resolvedData.mention = exports.getMentionFromUser(userResolvable);
     } else if (userType === 1) { // ID
-        resolvedData.member = guild.members.get(userResolvable);
-        resolvedData.mention = resolvedData.member ? exports.getMentionFromUser(resolvedData.member) : `<@${userResolvable}>`;
+        resolvedData.member = guild.members.get(resolvedData.id);
+        resolvedData.mention = resolvedData.member ? exports.getMentionFromUser(resolvedData.member) : `<@${resolvedData.id}>`;
     } else if (userType === 2) { // Name or System
         if (system) { // VaeBot
             resolvedData.member = guild.members.get(selfId);
