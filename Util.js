@@ -1638,7 +1638,7 @@ exports.getBestMatch = function (container, key, name) { // [v3.0] Visible name 
         }
     });
 
-    return strongest != null ? strongest.obj : null;
+    return strongest != null ? strongest.obj : undefined;
 };
 
 exports.getMemberByName = function (name, guild) { // [v3.0] Visible name match, real name match, length match, caps match, position match
@@ -1725,7 +1725,7 @@ exports.getMemberByName = function (name, guild) { // [v3.0] Visible name match,
         }
     });
 
-    return strongest != null ? strongest.member : null;
+    return strongest != null ? strongest.member : undefined;
 };
 
 exports.getMemberByNameOld = function (name, guild) { // [v2.0] Visible name match, real name match, length match, caps match, position match //
@@ -2380,6 +2380,8 @@ exports.resolveUser = function (guild, userResolvable, canBeSystem) { // If user
     let userType = 0; // Member
     let system = false;
 
+    let wasId = false;
+
     if (typeof userResolvable === 'string') {
         const idMatch = exports.isId(userResolvable);
         if (idMatch) {
@@ -2402,10 +2404,7 @@ exports.resolveUser = function (guild, userResolvable, canBeSystem) { // If user
         resolvedData.member = guild.members.get(resolvedData.id);
         resolvedData.user = resolvedData.member ? resolvedData.member.user : client.users.get(resolvedData.id);
         if (!resolvedData.user) { // Could be a name imitating an ID
-            resolvedData.member = userResolvable;
-            resolvedData.user = userResolvable;
-            resolvedData.id = userResolvable;
-            resolvedData.mention = userResolvable;
+            wasId = true;
             userType = 2;
         } else {
             resolvedData.mention = exports.resolveMention(resolvedData.member || resolvedData.user);
@@ -2419,18 +2418,17 @@ exports.resolveUser = function (guild, userResolvable, canBeSystem) { // If user
             resolvedData.id = selfId;
         } else { // Name
             resolvedData.member = exports.getMemberByMixed(userResolvable, guild);
-            if (!resolvedData.member) { // Not in guild
-                resolvedData.user = exports.getUserByName(userResolvable);
-                if (!resolvedData.user) return 'User not found'; // No user or member
-            } else { // Is in guild
-                resolvedData.user = resolvedData.member.user;
+            resolvedData.user = resolvedData.member ? resolvedData.member.user : exports.getUserByName(userResolvable);
+            if (resolvedData.user) {
+                resolvedData.id = resolvedData.user.id;
+                resolvedData.mention = exports.resolveMention(resolvedData.member || resolvedData.user);
+            } else if (!wasId) { // Didn't branch from id
+                return 'User not found'; // No user or member
             }
-            resolvedData.id = resolvedData.user.id;
-            resolvedData.mention = exports.resolveMention(resolvedData.member || resolvedData.user);
         }
     }
 
-    return resolvedData; // [Definite Values] ID: Always | Mention: Always | Member: All inputs except ID and User
+    return resolvedData; // [Definite Values] ID: Always | Mention: Always | Member/User: All inputs except ID and Name
 };
 
 exports.onFetch = function (messagesParam, channel, leftParam, store) {
