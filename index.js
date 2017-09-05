@@ -254,6 +254,7 @@ exports.globalBan = {
     '331958080164200453': true, // derickbuum
     '284410389469593611': true, // Papi
     '255779902387650560': true, // Shiro's Twin
+    '80385350316339200': true, // Fennec
 };
 
 function securityFunc(guild, member, sendRoleParam) {
@@ -931,6 +932,41 @@ Util.log(contentLower); */
     }
 }); */
 
+/* exports.runFuncs.push((msgObj, speaker, channel, guild) => {
+    if (guild == null || msgObj == null || speaker == null || speaker.user.bot === true || speaker.id === vaebId || speaker.id === guild.owner.id) return;
+
+    let contentLower = msgObj.content.toLowerCase();
+    contentLower = contentLower.replace(/<[^ ]*?[:#@][^ ]*?>/gm, '');
+    contentLower = Util.replaceAll(contentLower, ' ', '');
+    contentLower = Util.replaceAll(contentLower, 'one', '1');
+    contentLower = Util.replaceAll(contentLower, 'won', '1');
+    contentLower = Util.replaceAll(contentLower, 'uno', '1');
+    contentLower = Util.replaceAll(contentLower, 'una', '1');
+    contentLower = Util.replaceAll(contentLower, 'two', '2');
+    contentLower = Util.replaceAll(contentLower, 'dose', '2');
+    contentLower = Util.replaceAll(contentLower, 'dos', '2');
+    contentLower = Util.replaceAll(contentLower, 'too', '2');
+    contentLower = Util.replaceAll(contentLower, 'to', '2');
+    contentLower = Util.replaceAll(contentLower, 'three', '3');
+    contentLower = Util.replaceAll(contentLower, 'tres', '3');
+    contentLower = Util.replaceAll(contentLower, 'free', '3');
+
+    let triggered = false;
+
+    const trigger = [/1\W*2\W*3\d/g];
+
+    for (let i = 0; i < trigger.length; i++) {
+        if (trigger[i].test(contentLower)) {
+            triggered = true;
+            break;
+        }
+    }
+
+    if (triggered) {
+        Admin.addBan(guild, channel, speaker, 'System', { time: null, reason: 'Banned Themself', temp: true });
+    }
+}); */
+
 exports.runFuncs.push((msgObj, speaker, channel, guild) => {
     if (guild == null || msgObj == null || speaker == null || speaker.user.bot === true || speaker.id === vaebId) return;
 
@@ -1133,6 +1169,8 @@ exports.runFuncs.push((msgObj, speaker, channel, guild) => {
     return false;
 });
 
+const staffMessages = {};
+
 client.on('message', (msgObj) => {
     const channel = msgObj.channel;
     if (channel.name === 'vaebot-log') return;
@@ -1178,6 +1216,10 @@ client.on('message', (msgObj) => {
         for (let i = 0; i < exports.runFuncs.length; i++) {
             exports.runFuncs[i](msgObj, speaker, channel, guild, false);
         }
+    }
+
+    if (guild != null && speaker != null) {
+        if (!has.call(staffMessages, speaker.id)) staffMessages[speaker.id] = {};
     }
 
     if (guild != null && author.bot === false && content.length > 0 && author.id !== guild.owner.id && author.id !== vaebId && !Admin.checkMuted(guild, author.id)) { // If they are eligible for anti-spam checks
