@@ -1558,9 +1558,7 @@ exports.getMatchStrength = function (fullStr, subStr) { // [v2.0]
     return value;
 };
 
-exports.stripUnicode = str => str.replace(/[^\0-\x7F]/g, '');
-
-exports.getDiscriminatorFromName = (name) => {
+exports.getDiscriminatorFromName = function (name) {
     const discrimPattern = /#(\d\d\d\d)$/gm;
     let discrim = discrimPattern.exec(name);
     discrim = discrim ? discrim[1] : null;
@@ -1657,12 +1655,17 @@ exports.getBestMatch = function (container, key, name) { // [v3.0] Visible name 
 exports.getMemberByName = function (name, guild) { // [v3.0] Visible name match, real name match, length match, caps match, position match
     if (guild == null) return undefined;
 
+    const nameDiscrim = exports.getDiscriminatorFromName(name);
+    if (nameDiscrim) {
+        const namePre = name.substr(0, name.length - 5);
+        const member = guild.members.find(m => m.user.username === namePre && m.user.discriminator === nameDiscrim);
+        if (member) return member;
+    }
+
+    let removeUnicode = true;
+    const origName = name.trim();
+
     name = name.replace(/[^\x00-\x7F]/g, '').trim();
-
-
-    if (guild == null) return undefined;
-    
-    const removeUnicode = name.replace(/[^\0-\x7F]/g, '') == name;
 
     if (name.length == 0) {
         name = origName;
@@ -1799,21 +1802,9 @@ exports.getMemberByNameOld = function (name, guild) { // [v2.0] Visible name mat
 
             const maxCaps = Math.min(name.length, realName.length);
             let numCaps = 0;
-            for (let i=0; ch=name[i++];) {
-                if (ch == nameMatched[i+nameMatch]) numCaps++;
+            for (let j = 0; j < maxCaps; j++) {
+                if (name[j] === realName[nameMatch + j]) numCaps++;
             }
-			
-            numCaps = numCaps / name.length;
-            value += 2 ** (--level + numCaps);
-            // ^ actually adds a level if 100% of the caps match
-            
-            // Add bonus points depending on when our match start
-            const p = nameMatch === 0 ? 0.001 : nameMatch/nameMatched.length;
-            // ^ 0.001 if we match the beginning, higher for later matches
-            value += 2 ** (--level + (1-p));
-            
-            if (value > strongest[0]) strongest = [value,member];
-=======
             const caps = Math.min(numCaps / maxCaps, 0.999);
             // const capsExp = (filledExp * 0.5 - 1 + caps);
             const capsExp = (1 + caps);
@@ -1829,9 +1820,13 @@ exports.getMemberByNameOld = function (name, guild) { // [v2.0] Visible name mat
 
             // Util.log(value);
             matchStrength.push([value, member]);
->>>>>>> 706d6ac... Linting changes
         }
     });
+
+    for (let i = 0; i < matchStrength.length; i++) {
+        const strength = matchStrength[i];
+        if (strength[0] > strongest[0]) strongest = strength;
+    }
 
     return strongest[1];
 };
@@ -2825,8 +2820,6 @@ let lastWasEmpty = true;
 function postOutString(args, startNewline) {
     const nowDate = new Date();
     nowDate.setHours(nowDate.getHours() + 1);
-	
-    if (!lastWasEmpty) console.log('');
 
     let out = (startNewline && !lastWasEmpty) ? '\n' : '';
     out += NodeUtil.format(...args);
@@ -2846,7 +2839,7 @@ exports.log = function (...args) {
     lastTag = null;
 };
 
-exports.logc = function(...args) {
+exports.logc = function (...args) {
     const nowTag = String(args.splice(0, 1)).toLowerCase();
     const isNew = lastTag != nowTag;
     postOutString(args, isNew);
