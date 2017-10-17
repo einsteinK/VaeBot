@@ -53,8 +53,8 @@ module.exports = Cmds.addCommand({
             return Util.commandFailed(channel, speaker, 'Invalid parameters: Action(s) not provided');
         }
 
-        console.log(event);
-        console.log(actions);
+        Util.log(event);
+        Util.log(actions);
 
         for (let i = 0; i < event.length; i++) {
             const eventName = event[i];
@@ -78,7 +78,7 @@ module.exports = Cmds.addCommand({
                 sendEmbedFields.push({ name: 'Event', value: eventName, inline: false });
                 sendEmbedFields.push({ name: 'Action', value: actionName, inline: false });
 
-                Util.sendEmbed(channel, 'Created Link', null, Util.makeEmbedFooter(speaker), null, 0x00E676, sendEmbedFields);
+                Util.sendEmbed(channel, 'Created Link', null, Util.makeEmbedFooter(speaker), null, colGreen, sendEmbedFields);
             }
         }
     },

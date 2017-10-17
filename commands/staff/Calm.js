@@ -34,7 +34,7 @@ module.exports = Cmds.addCommand({
             var msgContent = msgObj.content;
             var msgCreatedAt = msgObj.createdAt;
 
-            // Util.sendEmbed(msgChannel, Util.getMostName(msgSpeaker), msgContent, Util.makeEmbedFooter(msgSpeaker, msgCreatedAt), null, 0x00E676, null);
+            // Util.sendEmbed(msgChannel, Util.getMostName(msgSpeaker), msgContent, Util.makeEmbedFooter(msgSpeaker, msgCreatedAt), null, colGreen, null);
             msgChannel.send(Util.getMostName(msgSpeaker) + ": " + msgContent);
         }, index.calmSpeed);
 
@@ -44,7 +44,7 @@ module.exports = Cmds.addCommand({
     func: (cmd, args, msgObj, speaker, channel, guild) => {
         if (speaker.id != guild.ownerID && speaker.id != vaebId) return Util.commandFailed(channel, speaker, "Command is owner-only");
 
-        if (index.slowChat[guild.id]) return console.log("Slow is already active");
+        if (index.slowChat[guild.id]) return Util.log("Slow is already active");
 
         index.chatNext[guild.id] = (+ new Date()) + index.calmSpeed;
 

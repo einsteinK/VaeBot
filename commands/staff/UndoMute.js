@@ -8,18 +8,15 @@ module.exports = Cmds.addCommand({
 
     desc: "Remove a user's last mute from their record and unmute them if they are muted",
 
-    args: '([@user] | [id] | [name])',
+    args: '([user_resolvable])',
 
     example: 'vae',
 
     // /////////////////////////////////////////////////////////////////////////////////////////
 
     func: (cmd, args, msgObj, speaker, channel, guild) => {
-        const target = Util.getMemberByMixed(args, guild);
-        if (target == null) return Util.commandFailed(channel, speaker, 'User not found');
+        args = args.trim();
 
-        Mutes.undoMute(target, guild, Util.getPosition(speaker), channel, speaker);
-
-        return undefined;
+        Admin.remMute(guild, channel, args, speaker);
     },
 });

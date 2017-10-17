@@ -38,8 +38,8 @@ module.exports = Cmds.addCommand({
 
         guild.members.forEach((member) => {
             if (!Util.hasRole(member, role) || member.id === selfId) return;
-            console.log(`Sent DM to ${Util.getFullName(member)}`);
-            Util.sendDescEmbed(member, title, message, footer, null, 0x00BCD4);
+            Util.log(`Sent DM to ${Util.getFullName(member)}`);
+            Util.sendDescEmbed(member, title, message, footer, null, colBlue);
         });
 
         return undefined;

@@ -27,6 +27,9 @@ const FileSys = index.FileSys;
 const DateFormat = index.DateFormat;
 const Exec = index.Exec;
 const Path = index.Path;
+const NodeUtil = index.NodeUtil;
+
+exports.charLimit = 1999;
 
 exports.regexURLPerfect = new RegExp(
     '^' +
@@ -286,7 +289,7 @@ function getURLChecker() {
         txt = exports.replaceAll(txt, '*', '');
         txt = exports.replaceAll(txt, '_', '');
 
-        if (txt.includes('roblox')) console.log(txt);
+        if (txt.includes('roblox')) Util.log(txt);
 
         const options = optionsParam || {};
 
@@ -296,19 +299,19 @@ function getURLChecker() {
         let link;
         let href;
 
-            // Output HTML.
+        // Output HTML.
         // const html = '';
 
-            // Store text / link parts, in order, for re-combination.
+        // Store text / link parts, in order, for re-combination.
         const parts = [];
 
-            // Used for keeping track of indices in the text.
+        // Used for keeping track of indices in the text.
         let idxPrev;
         let idxLast;
         let idx;
         let linkLast;
 
-            // Used for trimming trailing punctuation and quotes from links.
+        // Used for trimming trailing punctuation and quotes from links.
         let matchesBegin;
         let matchesEnd;
         let quoteBegin;
@@ -368,7 +371,7 @@ function getURLChecker() {
             // Add appropriate protocol to naked links.
             if (!SCHEME_RE.test(href)) {
                 const origHref = href;
-                if (href.indexOf('@') !== -1) {
+                if (href.indexOf('@') != -1) {
                     if (!href.indexOf(MAILTO)) {
                         href = '';
                     } else {
@@ -415,19 +418,19 @@ function getURLChecker() {
 
 exports.checkURLs = getURLChecker();
 
-exports.initRoles = (sendRole, guild) => {
+exports.initRoles = function (sendRole, guild) {
     const members = guild.members;
 
     members.forEach((member) => {
         if (!exports.hasRole(member, sendRole)) {
             member.addRole(sendRole)
-            .then(() => console.log(`Assigned role to ${exports.getName(member)}`))
-            .catch(error => console.log(`\n[E_InitRoles] addRole: ${error}`));
+                .then(() => Util.log(`Assigned role to ${exports.getName(member)}`))
+                .catch(error => Util.log(`[E_InitRoles] addRole: ${error}`));
         }
     });
 };
 
-exports.arrayToObj = (arr) => {
+exports.arrayToObj = function (arr) {
     const obj = {};
     for (let i = 0; i < arr.length; i++) {
         const val = arr[i];
@@ -436,19 +439,19 @@ exports.arrayToObj = (arr) => {
     return obj;
 };
 
-exports.capitalize = (strParam) => {
+exports.capitalize = function (strParam) {
     let str = strParam;
     str = String(str);
     return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
-exports.runLua = (args, channel) => {
+exports.runLua = function (args, channel) {
     // args = "os=nil;io=nil;debug=nil;package=nil;require=nil;loadfile=nil;dofile=nil;collectgarbage=nil;" + args;
     const tagNum = Math.floor((new Date()).getTime());
     const fileDir = `/tmp/script_${tagNum}.lua`;
     FileSys.writeFile(fileDir, args, (err) => {
         if (err) {
-            console.log(`Script creation error: ${err}`);
+            Util.log(`Script creation error: ${err}`);
             Util.print(channel, `Script creation error: ${err}`);
         }
         Exec(`lua ${fileDir}`, (error, stdoutParam, stderr) => {
@@ -460,7 +463,7 @@ exports.runLua = (args, channel) => {
             if (error) {
                 outStr.push('**Execution error:**');
                 outStr.push('```');
-                console.log(`Execution Error: ${stderr}`);
+                Util.log(`Execution Error: ${stderr}`);
                 outStr.push(error);
                 outStr.push('```');
             } else {
@@ -488,7 +491,7 @@ exports.runLua = (args, channel) => {
                 if (stderr) {
                     outStr.push('**Lua Error:**');
                     outStr.push('```');
-                    console.log(`Lua Error: ${stderr}`);
+                    Util.log(`Lua Error: ${stderr}`);
                     outStr.push(stderr);
                     outStr.push('```');
                 }
@@ -499,34 +502,34 @@ exports.runLua = (args, channel) => {
     });
 };
 
-exports.doXOR = (a, b) => {
-    const result = ((a === 1 || b === 1) && !(a === 1 && b === 1)) ? 1 : 0;
+exports.doXOR = function (a, b) {
+    const result = ((a == 1 || b == 1) && !(a == 1 && b == 1)) ? 1 : 0;
     return result;
 };
 
-exports.capitalize2 = (strParam, repUnder) => {
+exports.capitalize2 = function (strParam, repUnder) {
     let str = String(strParam);
     if (repUnder) str = exports.replaceAll(str, '_', ' ');
-    str = str.replace(/[0-9a-z]+/ig, (txt) => { console.log(txt); return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
+    str = str.replace(/[0-9a-z]+/ig, (txt) => { Util.log(txt); return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
     return str;
 };
 
-exports.boolToAns = (bool) => {
+exports.boolToAns = function (bool) {
     const result = bool ? 'Yes' : 'No';
     return result;
 };
 
-exports.safe = (str) => {
+exports.safe = function (str) {
     if (typeof (str) === 'string') return str.replace(/`/g, '\\`').replace(/@/g, '@­');
     return undefined;
 };
 
-exports.safe2 = (str) => {
+exports.safe2 = function (str) {
     if (typeof (str) === 'string') return str.replace(/`/g, '\\`');
     return undefined;
 };
 
-exports.safeEveryone = (str) => {
+exports.safeEveryone = function (str) {
     if (typeof (str) === 'string') {
         const newStr = str.replace(/@everyone/g, '@​everyone');
         return newStr.replace(/@here/g, '@​here');
@@ -538,7 +541,7 @@ exports.fix = str => (`\`${exports.safe(str)}\``);
 
 exports.toFixedCut = (num, decimals) => Number(num.toFixed(decimals)).toString();
 
-exports.grabFiles = (filePath, filter = () => true) => {
+exports.grabFiles = function (filePath, filter = () => true) {
     const dirFiles = FileSys.readdirSync(filePath);
     let fullFiles = [];
     dirFiles.forEach((file) => {
@@ -553,7 +556,7 @@ exports.grabFiles = (filePath, filter = () => true) => {
     return fullFiles;
 };
 
-exports.bulkRequire = (filePath) => {
+exports.bulkRequire = function (filePath) {
     const bulkFiles = exports.grabFiles(filePath, file => file.endsWith('.js'));
 
     for (const data of Object.values(bulkFiles)) {
@@ -561,7 +564,7 @@ exports.bulkRequire = (filePath) => {
     }
 };
 
-exports.pathRequire = (filePath) => {
+exports.pathRequire = function (filePath) {
     const file = Path.resolve(filePath);
     delete require.cache[require.resolve(file)];
 
@@ -583,25 +586,34 @@ exports.pathRequire = (filePath) => {
     }
 };
 
-exports.checkStaff = (guild, member) => {
+exports.checkStaff = function (guild, member) {
     if (member.id === vaebId || member.id === selfId || member.id === guild.ownerID) return true;
     const speakerRoles = member.roles;
     if (!speakerRoles) return false;
     if (exports.getPermRating(guild, member) >= 30) return true;
     return speakerRoles.some(role => role.name === 'Staff' || role.name === 'Owner/Seller' || role.name === 'Bot Admin'
-        || role.name === 'Moderator' || role.name === 'Head Mod');
+        || role.name === 'Moderator' || role.name === 'Head Mod' || role.name === 'Trial Moderator');
 };
 
-exports.commandFailed = (channel, speaker, message) => {
-    if (channel != null) {
-        exports.sendEmbed(channel, 'Command Failed', message, exports.makeEmbedFooter(speaker), null, 0x00E676, null);
-    } else {
-        console.log(`[Command_Failed] ${speaker.id}: ${message}`);
+exports.commandFailed = function (channel, speaker, tag, message) {
+    if (message == null) {
+        message = tag;
+        tag = null;
     }
+
+    const tagMessage = tag ? `[${tag}] ` : '';
+
+    if (channel != null) {
+        exports.sendEmbed(channel, `${tagMessage}Command Failed`, message, exports.makeEmbedFooter(speaker), null, colGreen, null);
+    } else {
+        Util.log(`${tagMessage}[Command_Failed] ${speaker.id}: ${message}`);
+    }
+
     return false;
 };
 
-exports.getRandomInt = (minParam, maxParam) => { // inclusive, exclusive
+exports.getRandomInt = function (minParam, maxParam) { // inclusive, exclusive
+    maxParam++; // inclusive, inclusive
     const min = Math.ceil(minParam);
     const max = Math.floor(maxParam);
     return Math.floor(Math.random() * (max - min)) + min;
@@ -635,7 +647,7 @@ exports.getRandomInt = (minParam, maxParam) => { // inclusive, exclusive
     }
 
     return chunks;
-}*/
+} */
 
 /*
 
@@ -656,12 +668,12 @@ exports.getRandomInt = (minParam, maxParam) => { // inclusive, exclusive
 
 */
 
-exports.isObject = (val) => { // Or array
+exports.isObject = function (val) { // Or array
     if (val == null) return false;
     return (typeof (val) === 'object');
 };
 
-exports.cloneObj = (obj) => {
+exports.cloneObj = function (obj, fixBuffer) {
     let copy;
 
     if (obj == null || typeof (obj) !== 'object') return obj;
@@ -676,47 +688,83 @@ exports.cloneObj = (obj) => {
         copy = [];
         const len = obj.length;
         for (let i = 0; i < len; i++) {
-            copy[i] = exports.cloneObj(obj[i]);
+            copy[i] = exports.cloneObj(obj[i], fixBuffer);
         }
         return copy;
     }
 
-    if (obj instanceof Object) {
+    if (fixBuffer && obj instanceof Buffer) {
+        return obj.readUIntBE(0, 1);
+    }
+
+    if (obj instanceof Object && !(obj instanceof Buffer)) {
         copy = {};
 
         for (const [attr, objAttr] of Object.entries(obj)) {
-            copy[attr] = exports.cloneObj(objAttr);
+            copy[attr] = exports.cloneObj(objAttr, fixBuffer);
         }
         return copy;
     }
 
-    throw new Error("Unable to copy obj! Its type isn't supported.");
+    return obj;
 };
 
-exports.formatTime = (time) => {
+const elapseTimeTags = {};
+
+exports.getElapsed = function (tag, remove) {
+    let elapsed;
+
+    if (elapseTimeTags[tag] != null) {
+        const startTimeData = elapseTimeTags[tag];
+        const elapsedTimeData = process.hrtime(startTimeData); // Seconds, Nanoseconds (Seconds * 1e9)
+        elapsed = (elapsedTimeData[0] * 1e3) + Number((elapsedTimeData[1] / 1e6).toFixed(3));
+    }
+
+    if (remove) {
+        elapseTimeTags[tag] = null;
+        delete elapseTimeTags[tag]; // Remove time storage
+    } else {
+        elapseTimeTags[tag] = process.hrtime(); // Mark the start time
+    }
+
+    return elapsed;
+};
+
+exports.formatTime = function (time) {
     let timeStr;
     let formatStr;
 
-    const numSeconds = exports.round(time / 1000, 1);
-    const numMinutes = exports.round(time / 60000, 0.1);
-    const numHours = exports.round(time / 3600000, 0.1);
-    const numDays = exports.round(time / 86400000, 0.1);
-    const numYears = exports.round(time / 31536000000, 0.1);
+    const numSeconds = exports.round(time / 1000, 0.1);
+    const numMinutes = exports.round(time / (1000 * 60), 0.1);
+    const numHours = exports.round(time / (1000 * 60 * 60), 0.1);
+    const numDays = exports.round(time / (1000 * 60 * 60 * 24), 0.1);
+    const numWeeks = exports.round(time / (1000 * 60 * 60 * 24 * 7), 0.1);
+    const numMonths = exports.round(time / (1000 * 60 * 60 * 24 * 30.42), 0.1);
+    const numYears = exports.round(time / (1000 * 60 * 60 * 24 * 365.2422), 0.1);
 
-    if (numSeconds < 60) {
-        timeStr = numSeconds.toFixed(0);
+    if (numSeconds < 1) {
+        timeStr = exports.toFixedCut(time, 0);
+        formatStr = `${timeStr} millisecond`;
+    } else if (numMinutes < 1) {
+        timeStr = exports.toFixedCut(numSeconds, 1);
         formatStr = `${timeStr} second`;
-    } else if (numMinutes < 60) {
-        timeStr = numMinutes % 1 === 0 ? numMinutes.toFixed(0) : numMinutes.toFixed(1);
+    } else if (numHours < 1) {
+        timeStr = exports.toFixedCut(numMinutes, 1);
         formatStr = `${timeStr} minute`;
-    } else if (numHours < 60) {
-        timeStr = numHours % 1 === 0 ? numHours.toFixed(0) : numHours.toFixed(1);
+    } else if (numDays < 1) {
+        timeStr = exports.toFixedCut(numHours, 1);
         formatStr = `${timeStr} hour`;
-    } else if (numDays < 365) {
-        timeStr = numDays % 1 === 0 ? numDays.toFixed(0) : numDays.toFixed(1);
+    } else if (numWeeks < 1) {
+        timeStr = exports.toFixedCut(numDays, 1);
         formatStr = `${timeStr} day`;
+    } else if (numMonths < 1) {
+        timeStr = exports.toFixedCut(numWeeks, 1);
+        formatStr = `${timeStr} week`;
+    } else if (numYears < 1) {
+        timeStr = exports.toFixedCut(numMonths, 1);
+        formatStr = `${timeStr} month`;
     } else {
-        timeStr = numYears % 1 === 0 ? numYears.toFixed(0) : numYears.toFixed(1);
+        timeStr = exports.toFixedCut(numYears, 1);
         formatStr = `${timeStr} year`;
     }
 
@@ -725,14 +773,14 @@ exports.formatTime = (time) => {
     return formatStr;
 };
 
-exports.chunkString = (str, maxChars) => {
+exports.chunkString = function (str, maxChars) {
     const iterations = Math.ceil(str.length / maxChars);
     const chunks = new Array(iterations);
     for (let i = 0, j = 0; i < iterations; ++i, j += maxChars) chunks[i] = str.substr(j, maxChars);
     return chunks;
 };
 
-exports.cutStringSafe = (msg, postMsg, lastIsOpener) => { // Tries to cut the string along a newline
+exports.cutStringSafe = function (msg, postMsg, lastIsOpener) { // Tries to cut the string along a newline
     let lastIndex = msg.lastIndexOf('\n');
     if (lastIndex < 0) return [msg, postMsg];
     let preCut = msg.substring(0, lastIndex);
@@ -752,23 +800,24 @@ exports.cutStringSafe = (msg, postMsg, lastIsOpener) => { // Tries to cut the st
     return [preCut, postCut + postMsg];
 };
 
-exports.fixMessageLengthNew = (msgParam) => {
-    const argsFixed = exports.chunkString(msgParam, 2000); // Group string into sets of 2k chars
-    // argsFixed.forEach(o => console.log("---\n" + o));
+exports.fixMessageLengthNew = function (msgParam) {
+    const argsFixed = exports.chunkString(msgParam, exports.charLimit); // Group string into sets of 2k chars
+    const minusLimit = exports.charLimit - 4;
+    // argsFixed.forEach(o => Util.log("---\n" + o));
     let totalBlocks = 0; // Total number of *user created* code blocks come across so far (therefore if the number is odd then code block is currently open)
     for (let i = 0; i < argsFixed.length; i++) {
         let passOver = ''; // String to pass over as the start of the next chunk
         let msg = argsFixed[i];
         const numBlock = (msg.match(/```/g) || []).length; // Number of user created code blocks in this chunk
-        if (totalBlocks % 2 === 1) msg = `\`\`\`\n${msg}`; // If code block is currently open then this chunk needs to be formatted
-        totalBlocks += numBlock; // The user created code blocks may close/open new code block (don't need to include added ones because they just account for seperate messages)
-        let lastIsOpener = totalBlocks % 2 === 1; // Checks whether the last code block is an opener or a closer
-        if (lastIsOpener && msg.length > 1996) { // If the chunk ends with the code block still open then it needs to be auto-closed so the chunk needs to be shortened so it can fit
-            passOver = msg.substring(1996);
-            msg = msg.substr(0, 1996);
+        if (totalBlocks % 2 == 1) msg = `\`\`\`\n${msg}`; // If code block is currently open then this chunk needs to be formatted
+        totalBlocks += numBlock; // The user created code blocks may close/open new code block (don't need to include added ones because they just account for separate messages)
+        let lastIsOpener = totalBlocks % 2 == 1; // Checks whether the last code block is an opener or a closer
+        if (lastIsOpener && msg.length > minusLimit) { // If the chunk ends with the code block still open then it needs to be auto-closed so the chunk needs to be shortened so it can fit
+            passOver = msg.substring(minusLimit);
+            msg = msg.substr(0, minusLimit);
             const numPass = (passOver.match(/```/g) || []).length; // If we end up passing over code blocks whilst trying to shorten the string, we need to account for the new amount
             totalBlocks -= numPass;
-            if (numPass % 2 === 1) lastIsOpener = false;
+            if (numPass % 2 == 1) lastIsOpener = false;
         }
         const nextMsg = passOver + (argsFixed[i + 1] != null ? argsFixed[i + 1] : ''); // Message for next chunk (or empty string if none)
         if (nextMsg !== '' && nextMsg[0] !== '\n' && msg.includes('\n')) { // If start of next chunk is a newline then can just leave the split as it is now (same goes for this chunk having no newlines)
@@ -792,20 +841,20 @@ exports.fixMessageLengthNew = (msgParam) => {
     for (var i = 0; i < argsFixed.length; i++) {
         var passOver = "";
         var msg = argsFixed[i];
-        //console.log("Original message length: " + msg.length);
+        //Util.log("Original message length: " + msg.length);
         if (msg.length > 1996) {
             passOver = msg.substring(1996);
             msg = msg.substring(0, 1996);
-            //console.log("passStart orig: " + passOver.length);
+            //Util.log("passStart orig: " + passOver.length);
             var lastLine = msg.lastIndexOf("\n");
             if (lastLine >= 5) {
                 var msgEnd = lastLine;
                 var passStart = msgEnd+1;
                 passOver = msg.substring(passStart) + passOver;
                 msg = msg.substring(0, msgEnd);
-                //console.log("passOver: " + passOver.length);
-                //console.log("msg: " + msg.length);
-                //console.log("lastLine: " + lastLine);
+                //Util.log("passOver: " + passOver.length);
+                //Util.log("msg: " + msg.length);
+                //Util.log("lastLine: " + lastLine);
             }
         }
         var numBlock = (msg.match(/```/g) || []).length;
@@ -814,11 +863,11 @@ exports.fixMessageLengthNew = (msgParam) => {
             msg = msg + "\n```";
         }
         argsFixed[i] = msg;
-        //console.log("Message length: " + msg.length);
-        //console.log("Pass Over: " + passOver.length);
+        //Util.log("Message length: " + msg.length);
+        //Util.log("Pass Over: " + passOver.length);
         if (passOver != "" && (argsFixed[i+1] != null || passOver != "```\n")) {
             if (argsFixed[i+1] == null) {
-                //console.log("Created new print block extender")
+                //Util.log("Created new print block extender")
                 argsFixed[i+1] = "";
             }
             argsFixed[i+1] = passOver + argsFixed[i+1];
@@ -826,84 +875,273 @@ exports.fixMessageLengthNew = (msgParam) => {
     }
 
     return argsFixed;
-}*/
+} */
 
-exports.splitMessages = (messages) => {
+exports.splitMessagesOld = function (messages) {
     const fixed = exports.fixMessageLengthNew(messages.join(' '));
     return fixed;
 };
 
-const ePrint = error => console.log(`\n[E_Print] ${error}`);
+exports.escapeRegExp = function (str) {
+    return str.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
 
-exports.print = (channel, ...args) => {
-    const messages = exports.splitMessages(args);
-    for (let i = 0; i < messages.length; i++) {
-        channel.send(messages[i])
-        .catch(ePrint);
+function getMatchesWithBlock(str, matchChars, blockChars, useInside) { // Gets all matches of a substring that are in/out of a code block
+    const pattern = new RegExp(exports.escapeRegExp(blockChars), 'g');
+    let result;
+
+    let numMatches = 0;
+    let strPointer = 0;
+    let newStr = '';
+
+    while (result = pattern.exec(str)) {
+        numMatches++;
+        if (useInside) {
+            if (numMatches % 2 == 1) { // Open block
+                newStr += '.'.repeat(result.index - strPointer);
+                strPointer = result.index;
+            } else { // Close block (Store data)
+                newStr += '.'.repeat(blockChars.length) + str.substring(strPointer + blockChars.length, result.index);
+                strPointer = result.index;
+            }
+        } else {
+            if (numMatches % 2 == 1) { // Open block (Store data)
+                newStr += str.substring(strPointer, result.index);
+                strPointer = result.index;
+            } else { // Close block
+                newStr += '.'.repeat(result.index - strPointer + blockChars.length);
+                strPointer = result.index + blockChars.length;
+            }
+        }
     }
-};
 
-exports.sortPerms = (permsArr) => {
-    permsArr.sort((a, b) => exports.permissionsOrder[b] - exports.permissionsOrder[a]);
-};
+    if (useInside) {
+        newStr += '.'.repeat(str.length - strPointer);
+    } else {
+        newStr += str.substring(strPointer);
+    }
 
-exports.getGuildRoles = (guild) => {
-    const roles = [];
-    const guildRoles = guild.roles;
+    if (newStr.length != str.length) throw new Error('[E_GetMatchesWithBlock] Failed because the output string didn\'t match input string length');
 
-    guildRoles.forEach((nowRole) => {
-        const rolePos = nowRole.position;
-        let index;
+    return (newStr.match(new RegExp(exports.escapeRegExp(matchChars), 'g')) || []);
+}
 
-        for (index = 0; index < roles.length; index++) {
-            if (rolePos > roles[index].position) {
-                break;
+/*
+
+    chunkMessage
+        -Split messages into chunks <= exports.charLimit characters
+        -Chunks retain format (`, ``, ```, *, **, ***, _, __, ___) and thus account for fitting in format characters
+        -Message splitting focuses on retaining format over reducing number of chunks:
+            End ```
+            Newline + Newline
+            Newline + Format character(s)
+            Newline
+            Space
+            Any
+        -Make it so that if last chunk continued string onto next chunk, next chunk cuts at end of that string
+*/
+
+const formatSets = [
+    ['___', '__'],
+    ['***', '**', '*'],
+    ['```', '``', '`'],
+];
+
+const splitSets = [ // pivot: -1 = Split Start, 0 = Remove, 1 = Split End
+    { chars: '```', pivot: 1 }, // Only applies to end ```
+    { chars: '\n\n', pivot: 0 },
+    { chars: '\n', pivot: 0 },
+    { chars: ' ', pivot: 0 },
+];
+
+const leaveExtra = formatSets.reduce((a, b) => a.concat(b)).length * 2;
+
+function chunkMessage(msg) {
+    const origChunks = [msg];
+    let content = msg;
+    let appendBeginning = [];
+
+    const baseChunkSize = exports.charLimit - leaveExtra;
+
+    for (let i = 0; content; ++i, content = origChunks[i]) {
+        for (let j = 0; j < appendBeginning.length; j++) {
+            content = appendBeginning[j] + content;
+        }
+
+        if (content.length < exports.charLimit) {
+            origChunks[i] = content;
+            break;
+        }
+
+        let chunk = content.substr(0, baseChunkSize);
+        let leftOver;
+
+        appendBeginning = [];
+
+        for (let j = 0; j < splitSets.length; j++) {
+            const splitSet = splitSets[j];
+            const splitChars = splitSet.chars;
+            const splitType = splitSet.pivot;
+
+            let pivotStart = chunk.lastIndexOf(splitChars); // exclusive
+            let pivotEnd = pivotStart; // inclusive
+
+            if (pivotStart == -1) continue;
+
+            if (splitType == 1) { // Split End
+                pivotStart += splitChars.length;
+                pivotEnd = pivotStart;
+            } else if (splitType == 0) { // Remove
+                pivotEnd += splitChars.length;
+            }
+
+            let chunkTemp = chunk.substring(0, pivotStart);
+
+            if (splitChars == '```') { // Has to be closing a block
+                const numSets = (chunkTemp.match(new RegExp(exports.escapeRegExp(splitChars), 'g')) || []).length;
+                if (numSets % 2 == 1) {
+                    if (numSets == 1) continue;
+                    pivotStart = chunk.substring(0, pivotStart - splitChars.length).lastIndexOf(splitChars);
+                    if (pivotStart == -1) continue;
+                    pivotStart += splitChars.length;
+                    pivotEnd = pivotStart;
+                    chunkTemp = chunk.substring(0, pivotStart);
+                }
+            }
+
+            if (chunkTemp.length <= leaveExtra) continue;
+
+            Util.log(`Split on ${splitChars} @ ${pivotStart} @ ${pivotEnd}`);
+
+            chunk = chunkTemp;
+            leftOver = content.substr(pivotEnd);
+
+            /* if (i == 1) {
+                Util.log(chunkTemp);
+                Util.log('---');
+                Util.log(leftOver);
+            } */
+
+            break;
+        }
+
+        if (leftOver == null) {
+            Util.log('Split on last');
+            leftOver = content.substr(baseChunkSize);
+        }
+
+        for (let j = 0; j < formatSets.length; j++) {
+            const formatSet = formatSets[j];
+
+            for (let k = 0; k < formatSet.length; k++) {
+                const formatChars = formatSet[k];
+                const numSets = getMatchesWithBlock(chunk, formatChars, '```', false).length; // Should really only be counting matches not inside code blocks
+
+                if (numSets % 2 == 1) {
+                    chunk += formatChars;
+                    appendBeginning.push(formatChars);
+                    break;
+                }
             }
         }
 
-        roles.splice(index, 0, nowRole);
-    });
+        if (chunk.substr(chunk.length - 3, 3) == '```') appendBeginning.push('​\n');
 
-    return roles;
+        origChunks[i] = chunk;
+
+        if (leftOver && leftOver.length > 0) origChunks.push(leftOver);
+    }
+
+    return origChunks;
+}
+
+exports.splitMessages = function (messages) {
+    return chunkMessage(messages.join(' '));
 };
 
-exports.getName = (member) => {
-    const result = member.username || (member.user ? member.user.username : null);
-    return result;
+exports.print = function (channel, ...args) {
+    const messages = exports.splitMessages(args);
+    const promises = [];
+    for (let i = 0; i < messages.length; i++) {
+        const msg = messages[i];
+        // Util.log(`${channel.name}: ${msg.length}`);
+        promises.push(channel.send(msg));
+    }
+    return Promise.all(promises);
 };
 
-exports.getDisplayName = (member) => {
+exports.sortPerms = function (permsArr) {
+    permsArr.sort((a, b) => exports.permissionsOrder[b] - exports.permissionsOrder[a]);
+};
+
+exports.getGuildRoles = function (guild) {
+    return Array.from(guild.roles.values()).sort((a, b) => b.position - a.position); // From highest to lowest
+};
+
+exports.getName = function (userResolvable) {
+    if (userResolvable == null) return null;
+    if (typeof userResolvable === 'string') return userResolvable;
+    return Util.isMember(userResolvable) ? userResolvable.user.username : userResolvable.username;
+};
+
+exports.getMostName = function (userResolvable) {
+    if (userResolvable == null) return null;
+    if (typeof userResolvable === 'string') return userResolvable;
+    const username = exports.getName(userResolvable);
+    const discrim = Util.isMember(userResolvable) ? userResolvable.user.discriminator : userResolvable.discriminator;
+    return `${username}#${discrim}`;
+};
+
+exports.getFullName = function (userResolvable, strict) {
+    if (userResolvable == null) return strict ? null : 'null'; // TODO: Make strict default at some point
+    if (typeof userResolvable === 'string') return userResolvable;
+    const mostName = exports.getMostName(userResolvable);
+    return `${mostName} (${userResolvable.id})`;
+};
+
+exports.getDisplayName = function (member) {
     const result = member.displayName || member.username;
     return result;
 };
 
-exports.getMostName = (user) => {
-    const result = `${exports.getName(user)}#${user.getProp('discriminator')}`;
-    return result;
+exports.getMention = function (userResolvable, full) {
+    let out;
+
+    if (userResolvable.user) { // Member
+        out = userResolvable.toString();
+    } else if (userResolvable.id) { // User
+        out = full ? exports.getFullName(userResolvable) : exports.getMostName(userResolvable);
+    } else { // Id
+        out = `<@${userResolvable}>`;
+    }
+
+    return out;
 };
 
-exports.getFullName = (user) => {
-    const result = user != null ? (`${exports.getMostName(user)} (${user.id})`) : 'null';
-    return result;
-};
-
-exports.getMention = obj => obj.toString();
-
-exports.getAvatar = (user, outStr) => {
-    if (user != null && exports.isObject(user)) {
-        return (user.displayAvatarURL || (user.user ? user.user.displayAvatarURL : null));
+exports.getAvatar = function (userResolvable, outStr) {
+    if (userResolvable != null && exports.isObject(userResolvable)) {
+        if (userResolvable.user) userResolvable = userResolvable.user;
+        return userResolvable.displayAvatarURL({ format: 'png' });
     }
     return (outStr === true ? 'null' : null);
 };
 
-exports.getDateString = (d) => {
+exports.getDateString = function (d) {
+    if (d == null) d = new Date();
     const result = `${DateFormat(d, 'ddd, mmm dS yyyy @ h:MM TT')} GMT`;
     return result;
 };
 
 exports.hasRole = (member, role) => member.roles.has(role.id);
 
-exports.makeEmbedFooter = (user, dateParam) => {
+exports.hasRoleName = (member, name) => {
+    name = name.toLowerCase();
+    let hasRoleVal = member.roles.some(role => role.name.toLowerCase().includes(name));
+    if (!hasRoleVal && name.includes('support')) hasRoleVal = exports.hasRoleName(member, 'helper ghoul');
+    return hasRoleVal;
+};
+
+exports.makeEmbedFooter = function (user, dateParam) {
     const memberName = exports.isObject(user) ? exports.getDisplayName(user) : String(user);
     let date = dateParam;
     if (date == null) date = new Date();
@@ -911,16 +1149,16 @@ exports.makeEmbedFooter = (user, dateParam) => {
     return { text: `${memberName} | ${dateStr}`, icon_url: exports.getAvatar(user) };
 };
 
-exports.getSuffix = (n) => {
+exports.getSuffix = function (n) {
     const j = n % 10;
     const k = n % 100;
-    if (j === 1 && k !== 11) {
+    if (j == 1 && k != 11) {
         return `${n}st`;
     }
-    if (j === 2 && k !== 12) {
+    if (j == 2 && k != 12) {
         return `${n}nd`;
     }
-    if (j === 3 && k !== 13) {
+    if (j == 3 && k != 13) {
         return `${n}rd`;
     }
     return `${n}th`;
@@ -938,7 +1176,7 @@ exports.getSuffix = (n) => {
 
 */
 
-exports.setFieldValue = (embFields, nowFieldNum, nowString) => {
+exports.setFieldValue = function (embFields, nowFieldNum, nowString) {
     const nowField = embFields[nowFieldNum];
     if (nowString.length <= 512) {
         nowField.value = nowString;
@@ -977,7 +1215,7 @@ Field Value: 512 (maybe 1024?)
 
 */
 
-exports.sendEmbed = (embChannel, embTitle, embDesc, embFooterParam, embImage, embColor, embFieldsParam, isContinued) => {
+exports.sendEmbed = function (embChannel, embTitle, embDesc, embFooterParam, embImage, embColor, embFieldsParam, isContinued) {
     if (embChannel == null) return;
 
     let embFooter = embFooterParam;
@@ -987,6 +1225,10 @@ exports.sendEmbed = (embChannel, embTitle, embDesc, embFooterParam, embImage, em
     let extraFields;
 
     if (embFields == null) embFields = [];
+
+    for (let i = embFields.length - 1; i >= 0; i--) {
+        if (!embFields[i].name) embFields.splice(i, 1);
+    }
 
     if (embFields.length > 25) {
         manyFields = true;
@@ -1049,23 +1291,23 @@ exports.sendEmbed = (embChannel, embTitle, embDesc, embFooterParam, embImage, em
     };
 
     embChannel.send(undefined, { embed: embObj })
-    .catch((error) => {
-        console.log(`\n[E_SendEmbed] ${error} ${embChannel}`);
-        console.log(embObj);
-        console.log(JSON.stringify(embFields));
-    });
+        .catch((error) => {
+            Util.log(`[E_SendEmbed] ${error} ${embChannel}`);
+            Util.log(embObj);
+            Util.log(JSON.stringify(embFields));
+        });
 
     if (manyFields) {
         exports.sendEmbed(embChannel, embTitle, embDesc, embFooter, embImage, embColor, extraFields, true);
     }
 };
 
-exports.sendDescEmbed = (embChannel, embTitle, embDesc, embFooter, embImage, embColorParam) => {
+exports.sendDescEmbed = function (embChannel, embTitle, embDesc, embFooter, embImage, embColorParam) {
     if (embChannel == null) return;
 
     let embColor = embColorParam;
 
-    if (embColor == null) embColor = 0x00BCD4;
+    if (embColor == null) embColor = colBlue;
 
     if (embDesc != null && embDesc.length > 2048) {
         let subFirst = embDesc.substr(0, 2048);
@@ -1090,52 +1332,76 @@ exports.sendDescEmbed = (embChannel, embTitle, embDesc, embFooter, embImage, emb
     }
 };
 
-exports.sendLog = (embData, embColor) => {
+exports.sendLog = function (embData, embColor) {
     const embTitle = embData[0];
     const embGuild = embData[1];
     const embAuthor = embData[2];
     const embFields = embData.splice(3);
 
-    const embChannel = exports.findChannel('vaebot-log', embGuild);
-    if (embChannel == null) return;
+    for (let i = embFields.length - 1; i >= 0; i--) {
+        if (!embFields[i].name) embFields.splice(i, 1);
+    }
 
-    const embFooter = exports.makeEmbedFooter(embAuthor);
-    const embAvatar = exports.getAvatar(embAuthor);
+    const embedTitleLower = embTitle.toLowerCase();
 
-    exports.sendEmbed(
-      embChannel,
-      embTitle,
-      null,
-      embFooter,
-      embAvatar,
-      embColor,
-      embFields);
+    const logChannel = exports.findChannel('vaebot-log', embGuild);
+    if (logChannel) {
+        const embFooter = exports.makeEmbedFooter(embAuthor);
+        const embAvatar = exports.getAvatar(embAuthor);
+
+        exports.sendEmbed(
+            logChannel,
+            exports.cloneObj(embTitle),
+            null,
+            exports.cloneObj(embFooter),
+            exports.cloneObj(embAvatar),
+            exports.cloneObj(embColor),
+            exports.cloneObj(embFields));
+    }
+
+    const regex = /(\S*)(?:warn|mute|kick|ban)/i;
+    const pre = (regex.exec(embedTitleLower) || [])[1];
+
+    const modChannel = exports.findChannel('mod-logs', embGuild);
+    if (modChannel && pre != null && pre != 'un' && !embedTitleLower.includes('revert') && !embedTitleLower.includes('cleared')) {
+        const embFooter = exports.makeEmbedFooter(embAuthor);
+        const embAvatar = exports.getAvatar(embAuthor);
+
+        exports.sendEmbed(
+            modChannel,
+            exports.cloneObj(embTitle),
+            null,
+            exports.cloneObj(embFooter),
+            exports.cloneObj(embAvatar),
+            exports.cloneObj(embColor),
+            exports.cloneObj(embFields));
+    }
 };
 
-exports.getHourStr = (d) => {
+exports.getHourStr = function (d) {
     let valStr = (d.getHours()).toString();
     if (valStr.length < 2) valStr = `0${valStr}`;
     return valStr;
 };
 
-exports.getMinStr = (d) => {
+exports.getMinStr = function (d) {
     let valStr = (d.getMinutes()).toString();
     if (valStr.length < 2) valStr = `0${valStr}`;
     return valStr;
 };
 
-exports.getYearStr = (d) => {
+exports.getYearStr = function (d) {
     const valStr = (d.getFullYear()).toString();
     return valStr;
 };
 
-exports.getMonthStr = (d) => {
+exports.getMonthStr = function (d) {
     let valStr = (d.getMonth() + 1).toString();
     if (valStr.length < 2) valStr = `0${valStr}`;
     return valStr;
 };
 
-exports.getDayStr = (d) => {
+exports.getDayStr = function (d) {
     let valStr = (d.getDate()).toString();
     if (valStr.length < 2) valStr = `0${valStr}`;
     return valStr;
@@ -1160,48 +1426,77 @@ exports.getDayStr = (d) => {
         return false;
     })
     return user;
-}*/
+} */
 
-exports.searchUserPartial = (col, nameParam) => {
-    let name = nameParam;
-
+exports.searchUserPartial = function (container, name) {
     name = name.toLowerCase();
-    return col.find((member) => {
-        const userName = exports.getName(member);
-        if (member.id === name || exports.safe(userName.toLowerCase()).includes(name)) {
+    return container.find((user) => {
+        const username = exports.getName(user);
+        if (user.id === name || exports.safe(username.toLowerCase()).includes(name)) {
             return true;
         }
         return false;
     });
 };
 
-exports.round = (num, inc) => {
-    const result = (inc === 0 ? num : Math.floor((num / inc) + 0.5) * inc);
-    return result;
+exports.round = function (num, inc) {
+    return inc == 0 ? num : Math.floor((num / inc) + 0.5) * inc;
 };
 
-exports.write = (content, name) => {
+exports.write = function (content, name) {
     FileSys.writeFile(name, content);
 };
 
-exports.remove = (name) => {
+exports.remove = function (name) {
     FileSys.unlink(name);
 };
 
-exports.getHistory = (id, guild) => {
-    const userHistory = Data.guildGet(guild, Data.history, id);
-    if (userHistory) return userHistory[0];
-    return 0;
+exports.resolveUserMention = function (guild, id) {
+    let resolvedUser;
+
+    if (id == null) {
+        id = guild;
+        resolvedUser = client.users.get(id);
+    } else {
+        resolvedUser = exports.getMemberById(id, guild);
+    }
+
+    if (resolvedUser) return resolvedUser.toString();
+
+    return `<@${id}>`;
 };
 
-exports.historyToString = (num) => {
+exports.getNumMutes = async function (id, guild) {
+    const pastMutes = await Data.getRecords(guild, 'mutes', { user_id: id });
+    return pastMutes.length;
+};
+
+exports.historyToStringOld = function (num) {
     let timeHours = exports.round(num / 3600000, 0.1);
-    timeHours = (timeHours >= 1 || timeHours === 0) ? timeHours.toFixed(0) : timeHours.toFixed(1);
+    timeHours = (timeHours >= 1 || timeHours == 0) ? timeHours.toFixed(0) : timeHours.toFixed(1);
+    Util.log(`[RANDOM] timeHours: ${timeHours}`);
     return timeHours + (timeHours == 1 ? ' hour' : ' hours');
 };
 
-exports.getSafeId = (idParam) => {
-    let id = idParam;
+exports.historyToStringOld2 = function (num) {
+    let timeHours = num / 3600000;
+    Util.log(`[RANDOM] timeHours: ${timeHours}`);
+    timeHours += (timeHours == 1 ? ' hour' : ' hours');
+    return timeHours;
+};
+
+exports.historyToString = function (num) {
+    const timeStr = exports.formatTime(num);
+    return timeStr;
+};
+
+exports.matchWholeNumber = function (str) {
+    let result = str.match(/^\d*(?:\.\d+)?$/);
+    result = result ? result[0] : undefined;
+    return result;
+};
+
+exports.getSafeId = function (id) {
     id = id.match(/\d+/);
 
     if (id == null) return undefined;
@@ -1209,19 +1504,33 @@ exports.getSafeId = (idParam) => {
     return id[0];
 };
 
-exports.getMemberById = (idParam, guild) => {
-    let id = idParam;
-
-    if (guild == null || id == null) return undefined;
+exports.getMemberById = function (id, guild) {
+    if (id == null || guild == null) return null;
 
     if (id.substr(0, 1) === '<' && id.substr(id.length - 1, 1) === '>') id = exports.getSafeId(id);
 
-    if (id == null || id.length < 1) return undefined;
+    if (id == null || id.length < 1) return null;
 
-    return guild.members.find(member => member.id === id);
+    return guild.members.get(id);
 };
 
-exports.getMatchStrength = (fullStr, subStr) => { // [v2.0]
+exports.isId = function (str) {
+    let id = str.match(/^\d+$/);
+
+    if (id == null) {
+        id = str.match(/^<.?(\d+)>$/);
+        if (id == null) return undefined;
+        id = id[1];
+    } else {
+        id = id[0];
+    }
+
+    if (id.length < 17 || id.length > 19) return undefined;
+
+    return id;
+};
+
+exports.getMatchStrength = function (fullStr, subStr) { // [v2.0]
     let value = 0;
 
     const fullStrLower = fullStr.toLowerCase();
@@ -1242,15 +1551,208 @@ exports.getMatchStrength = (fullStr, subStr) => { // [v2.0]
         value += 2 ** (1 + caps);
 
         const totalPosition = fullStr.length - subStr.length;
-        const perc = 1 - (totalPosition * nameMatch === 0 ? 0.001 : nameMatch / totalPosition);
+        const perc = 1 - (totalPosition * nameMatch == 0 ? 0.001 : nameMatch / totalPosition);
         value += 2 ** perc;
     }
 
     return value;
 };
 
-exports.getMemberByName = (name, guild) => { // [v2.0] Visible name match, real name match, length match, caps match, position match //
+exports.getDiscriminatorFromName = function (name) {
+    const discrimPattern = /#(\d\d\d\d)$/gm;
+    let discrim = discrimPattern.exec(name);
+    discrim = discrim ? discrim[1] : null;
+    return discrim;
+};
+
+exports.isNumeric = function (str) {
+    return !isNaN(parseFloat(str)) && isFinite(str);
+};
+
+exports.entirelyNumbers = function (str) {
+    return /^\d+$/.test(str);
+};
+
+exports.getBestMatch = function (container, key, name) { // [v3.0] Visible name match, real name match, length match, caps match, position match
+    if (container == null) return undefined;
+
+    let removeUnicode = false;
+
+    if (key === 'username') {
+        removeUnicode = true;
+        const nameDiscrim = exports.getDiscriminatorFromName(name);
+        if (nameDiscrim) {
+            const namePre = name.substr(0, name.length - 5);
+            const user = container.find(m => m.username === namePre && m.discriminator === nameDiscrim);
+            if (user) return user;
+        }
+    }
+
+    const origName = name.trim();
+
+    if (removeUnicode) {
+        name = name.replace(/[^\x00-\x7F]/g, '').trim();
+        if (name.length == 0) {
+            name = origName;
+            removeUnicode = false;
+        }
+    }
+
+    const str2Lower = name.toLowerCase();
+    let strongest = null;
+
+    container.forEach((obj) => {
+        let realName = obj[key];
+        if (removeUnicode) realName = realName.replace(/[^\x00-\x7F]/g, '');
+        realName = realName.trim();
+        const nameMatch = realName.toLowerCase().indexOf(str2Lower);
+
+        const strength = { 'obj': obj };
+        let layer = 0;
+
+        if (nameMatch >= 0) {
+            strength[layer++] = 1;
+
+            // Util.log("(" + i + ") " + realName + ": " + value);
+            const filled = Math.min(name.length / realName.length, 0.999);
+            // Util.log("filled: " + filled);
+            strength[layer++] = filled;
+
+            const maxCaps = Math.min(name.length, realName.length);
+            let numCaps = 0;
+            for (let j = 0; j < maxCaps; j++) {
+                if (name[j] === realName[nameMatch + j]) numCaps++;
+            }
+            const caps = Math.min(numCaps / maxCaps, 0.999);
+            // const capsExp = (filledExp * 0.5 - 1 + caps);
+            // Util.log("caps: " + caps + " (" + numCaps + "/" + maxCaps + ")");
+            strength[layer++] = caps;
+
+            const totalPosition = realName.length - name.length;
+            const perc = 1 - (totalPosition * nameMatch == 0 ? 0.001 : nameMatch / totalPosition);
+            // const percExp = (capsExp - 2 + perc);
+            // Util.log("pos: " + perc + " (" + nameMatch + "/" + totalPosition + ")");
+            strength[layer++] = perc;
+
+            if (strongest == null) {
+                strongest = strength;
+            } else {
+                for (let i = 0; i < layer; i++) {
+                    if (strength[i] > strongest[i]) {
+                        strongest = strength;
+                        break;
+                    } else if (strength[i] < strongest[i]) {
+                        break;
+                    }
+                }
+            }
+        }
+    });
+
+    return strongest != null ? strongest.obj : undefined;
+};
+
+exports.getMemberByName = function (name, guild) { // [v3.0] Visible name match, real name match, length match, caps match, position match
     if (guild == null) return undefined;
+
+    const nameDiscrim = exports.getDiscriminatorFromName(name);
+    if (nameDiscrim) {
+        const namePre = name.substr(0, name.length - 5);
+        const member = guild.members.find(m => m.user.username === namePre && m.user.discriminator === nameDiscrim);
+        if (member) return member;
+    }
+
+    let removeUnicode = true;
+    const origName = name.trim();
+
+    name = name.replace(/[^\x00-\x7F]/g, '').trim();
+
+    if (name.length == 0) {
+        name = origName;
+        removeUnicode = false;
+    }
+
+    const str2Lower = name.toLowerCase();
+    const members = guild.members;
+    let strongest = null;
+
+    if (str2Lower == 'vaeb') {
+        const selfMember = members.get(vaebId);
+        if (selfMember) return selfMember;
+    }
+
+    members.forEach((member) => {
+        let realName = member.nickname != null ? member.nickname : exports.getName(member);
+        if (removeUnicode) realName = realName.replace(/[^\x00-\x7F]/g, '');
+        realName = realName.trim();
+        let realstr2Lower = realName.toLowerCase();
+        let nameMatch = realstr2Lower.indexOf(str2Lower);
+
+        const strength = { 'member': member };
+        let layer = 0;
+
+        if (nameMatch >= 0) {
+            strength[layer++] = 2;
+        } else {
+            realName = exports.getName(member);
+            if (removeUnicode) realName = realName.replace(/[^\x00-\x7F]/g, '');
+            realName = realName.trim();
+            realstr2Lower = realName.toLowerCase();
+            nameMatch = realstr2Lower.indexOf(str2Lower);
+            if (nameMatch >= 0) {
+                strength[layer++] = 1;
+            }
+        }
+
+        if (nameMatch >= 0) {
+            // Util.log("(" + i + ") " + realName + ": " + value);
+            const filled = Math.min(name.length / realName.length, 0.999);
+            // Util.log("filled: " + filled);
+            strength[layer++] = filled;
+
+            const maxCaps = Math.min(name.length, realName.length);
+            let numCaps = 0;
+            for (let j = 0; j < maxCaps; j++) {
+                if (name[j] === realName[nameMatch + j]) numCaps++;
+            }
+            const caps = Math.min(numCaps / maxCaps, 0.999);
+            // const capsExp = (filledExp * 0.5 - 1 + caps);
+            // Util.log("caps: " + caps + " (" + numCaps + "/" + maxCaps + ")");
+            strength[layer++] = caps;
+
+            const totalPosition = realName.length - name.length;
+            const perc = 1 - (totalPosition * nameMatch == 0 ? 0.001 : nameMatch / totalPosition);
+            // const percExp = (capsExp - 2 + perc);
+            // Util.log("pos: " + perc + " (" + nameMatch + "/" + totalPosition + ")");
+            strength[layer++] = perc;
+
+            if (strongest == null) {
+                strongest = strength;
+            } else {
+                for (let i = 0; i < layer; i++) {
+                    if (strength[i] > strongest[i]) {
+                        strongest = strength;
+                        break;
+                    } else if (strength[i] < strongest[i]) {
+                        break;
+                    }
+                }
+            }
+        }
+    });
+
+    return strongest != null ? strongest.member : undefined;
+};
+
+exports.getMemberByNameOld = function (name, guild) { // [v2.0] Visible name match, real name match, length match, caps match, position match //
+    if (guild == null) return undefined;
+
+    const nameDiscrim = exports.getDiscriminatorFromName(name);
+    if (nameDiscrim) {
+        const namePre = name.substr(0, name.length - 5);
+        const member = guild.members.find(m => m.user.username === namePre && m.user.discriminator === nameDiscrim);
+        if (member) return member;
+    }
 
     let removeUnicode = true;
     const origName = name.trim();
@@ -1258,7 +1760,7 @@ exports.getMemberByName = (name, guild) => { // [v2.0] Visible name match, real 
     name = name.replace(/[^\x00-\x7F]/g, '');
     name = name.trim();
 
-    if (name.length === 0) {
+    if (name.length == 0) {
         name = origName;
         removeUnicode = false;
     }
@@ -1279,7 +1781,7 @@ exports.getMemberByName = (name, guild) => { // [v2.0] Visible name match, real 
         let nameMatch = realstr2Lower.indexOf(str2Lower);
 
         if (nameMatch >= 0) {
-            value += 2 ** 4;
+            value += 2 ** 5;
         } else {
             realName = exports.getName(member);
             if (removeUnicode) realName = realName.replace(/[^\x00-\x7F]/g, '');
@@ -1287,15 +1789,16 @@ exports.getMemberByName = (name, guild) => { // [v2.0] Visible name match, real 
             realstr2Lower = realName.toLowerCase();
             nameMatch = realstr2Lower.indexOf(str2Lower);
             if (nameMatch >= 0) {
-                value += 2 ** (3);
+                value += 2 ** 4;
             }
         }
 
         if (nameMatch >= 0) {
-            // console.log("\n(" + i + ") " + realName + ": " + value);
+            // Util.log("(" + i + ") " + realName + ": " + value);
             const filled = Math.min(name.length / realName.length, 0.999);
-            // console.log("filled: " + filled);
-            value += 2 ** (2 + filled);
+            const filledExp = (2 + filled);
+            // Util.log("filled: " + filled);
+            value += 2 ** filledExp;
 
             const maxCaps = Math.min(name.length, realName.length);
             let numCaps = 0;
@@ -1303,15 +1806,19 @@ exports.getMemberByName = (name, guild) => { // [v2.0] Visible name match, real 
                 if (name[j] === realName[nameMatch + j]) numCaps++;
             }
             const caps = Math.min(numCaps / maxCaps, 0.999);
-            // console.log("caps: " + caps + " (" + numCaps + "/" + maxCaps + ")");
-            value += 2 ** (1 + caps);
+            // const capsExp = (filledExp * 0.5 - 1 + caps);
+            const capsExp = (1 + caps);
+            // Util.log("caps: " + caps + " (" + numCaps + "/" + maxCaps + ")");
+            value += 2 ** capsExp;
 
             const totalPosition = realName.length - name.length;
-            const perc = 1 - (totalPosition * nameMatch === 0 ? 0.001 : nameMatch / totalPosition);
-            // console.log("pos: " + perc + " (" + nameMatch + "/" + totalPosition + ")");
-            value += 2 ** perc;
+            const perc = 1 - (totalPosition * nameMatch == 0 ? 0.001 : nameMatch / totalPosition);
+            // const percExp = (capsExp - 2 + perc);
+            const percExp = (0 + perc);
+            // Util.log("pos: " + perc + " (" + nameMatch + "/" + totalPosition + ")");
+            value += 2 ** percExp;
 
-            // console.log(value);
+            // Util.log(value);
             matchStrength.push([value, member]);
         }
     });
@@ -1324,7 +1831,7 @@ exports.getMemberByName = (name, guild) => { // [v2.0] Visible name match, real 
     return strongest[1];
 };
 
-exports.getDataFromString = (str, funcs, returnExtra) => {
+function getDataFromStringInner(str, funcs, returnExtra) {
     const mix = str.split(' ');
     const baseStart = mix.length - 1;
     let start = baseStart;
@@ -1348,14 +1855,14 @@ exports.getDataFromString = (str, funcs, returnExtra) => {
             const result = funcs[index](combine.join(' '), results);
             if (result != null) {
                 /* if (index == 1) {
-                    console.log("[Z] " + combine.join(" "));
-                    console.log("[Z] " + remainingFuncs);
-                    console.log("[Z] " + remainingTerms);
-                    console.log("[Z] " + pos);
-                    console.log("[Z] " + start);
-                    console.log("[Z] " + end);
-                    console.log("[Z] " + result);
-                }*/
+                    Util.log("[Z] " + combine.join(" "));
+                    Util.log("[Z] " + remainingFuncs);
+                    Util.log("[Z] " + remainingTerms);
+                    Util.log("[Z] " + pos);
+                    Util.log("[Z] " + start);
+                    Util.log("[Z] " + end);
+                    Util.log("[Z] " + result);
+                } */
                 results.push(result);
                 index++;
                 if (index >= funcs.length) {
@@ -1385,9 +1892,157 @@ exports.getDataFromString = (str, funcs, returnExtra) => {
     }
 
     return undefined;
+}
+
+/*
+
+    If optional parameters:
+        -Fixed order
+        -Only one function per optional parameter (so no need for putting each function in its own array)
+        -Some optional parameters might only be an option if a previous optional parameter exists
+        -Some optional parameters might not have a space before them
+        -Don't know which parameters are being used
+
+    ;cmd optionalParam1 name optionalParam2DependsOnOP1 optionalParam2 time
+
+    const data = Util.getDataFromString(args,
+        [
+            {
+                func: function (str) {
+                    return Util.getMemberByMixed(str, guild) || Util.isId(str);
+                },
+            },
+            {
+                func: function (str) {
+                    const timeHours = Util.matchWholeNumber(str);
+                    return timeHours;
+                },
+                optional: true,
+            },
+            {
+                func: function (str) {
+                    let mult;
+                    str = str.toLowerCase();
+                    if (str.substr(str.length - 1, 1) == 's' && str.length > 2) str = str.substr(0, str.length - 1);
+                    if (str == 'millisecond' || str == 'ms') mult = 1 / 60 / 60 / 1000;
+                    if (str == 'second' || str == 's' || str == 'sec') mult = 1 / 60 / 60;
+                    if (str == 'minute' || str == 'm' || str == 'min') mult = 1 / 60;
+                    if (str == 'hour' || str == 'h') mult = 1;
+                    if (str == 'day' || str == 'd') mult = 24;
+                    if (str == 'week' || str == 'w') mult = 24 * 7;
+                    if (str == 'month' || str == 'mo') mult = 24 * 30.42;
+                    if (str == 'year' || str == 'y') mult = 24 * 365.2422;
+                    return mult;
+                },
+                optional: true,
+                requires: 1,
+                prefix: / ?/,
+            },
+        ]
+    , true);
+
+    - Get all possible variations that match the prefixes
+
+*/
+
+exports.getDataFromString = function (str, funcSets, returnExtra) {
+    if (typeof funcSets[0] == 'function') return getDataFromStringInner(str, funcSets, returnExtra);
+
+    const mainData = getDataFromStringInner(str, funcSets[0], returnExtra);
+
+    if (!mainData) return mainData;
+
+    let lastExtra = mainData[funcSets[0].length];
+    mainData.splice(funcSets[0].length);
+
+    for (let i = 1; i < funcSets.length; i++) {
+        if (!lastExtra || lastExtra.length == 0) break;
+        const nowData = getDataFromStringInner(lastExtra, funcSets[i], returnExtra);
+        if (nowData) {
+            for (let j = 0; j < funcSets[i].length; j++) mainData.push(nowData[j]);
+            lastExtra = nowData[funcSets[i].length];
+        } else {
+            for (let j = 0; j < funcSets[i].length; j++) mainData.push(null);
+        }
+    }
+
+    mainData.push(lastExtra);
+
+    return mainData;
 };
 
-exports.clamp = (num, minParam, maxParam) => {
+function matchSet(str, funcSets, setIndex, data) {
+    if (setIndex >= funcSets.length) {
+        return true;
+    }
+    data.fail = Math.max(data.fail, setIndex);
+    Util.log(`Loop ${setIndex}`);
+    const set = funcSets[setIndex++];
+    if (set.requires && data[set.requires] === undefined) {
+        Util.log('Missing requires');
+        if (!set.optional) return false;
+        data.push(undefined);
+        if (matchSet(str, funcSets, setIndex, data)) return true;
+        data.pop();
+    } else if (str.length === 0) {
+        for (let i = setIndex - 1, s; s = funcSets[i]; i++) {
+            if (!s.optional) return false;
+        }
+        return true;
+    }
+    const pMatch = str.match(set.prefix || (setIndex === 1 ? /\s*/ : /\s+/));
+    Util.log('\t', pMatch, setIndex, set.prefix || (setIndex === 1 ? /\s*/ : /\s+/));
+    if (!pMatch) return false;
+    if (pMatch.index !== 0) return false;
+    str = str.substr(pMatch[0].length);
+    for (let i = str.length; i >= 0; i--) {
+        const part = str.substr(0, i);
+        // Util.log(`\tchecking part ${part}`);
+        let good = true;
+        if (set.match) {
+            const mMatch = part.match(set.match);
+            good = mMatch[0] == part;
+        }
+        const res = good && set.func(part);
+        if (!res || !good) continue;
+        // Util.log("Got", res, "for", data.length, "with length", i);
+        data.push(res);
+        const left = str.substr(i);
+        if (matchSet(left, funcSets, setIndex, data)) {
+            // Util.log("Reached the end, yeuy!");
+            return true;
+        }
+        data.pop();
+        if (set.longest) return false;
+    }
+    if (!set.optional) return false;
+    return matchSet(str, funcSets, setIndex, data);
+}
+
+exports.getDataFromString2 = function (str, funcSets, returnExtra) {
+    const data = [];
+    data.fail = 0;
+    const done = [];
+    if (returnExtra) {
+        funcSets.push({
+            func(extra) {
+                return extra;
+            },
+            optional: true,
+        });
+    }
+    const success = matchSet(str, funcSets, 0, data, done);
+    data.success = success;
+    if (success) {
+        for (let i = data.length; i < funcSets.length; i++) {
+            data.push(undefined);
+        }
+        delete data.fail;
+    }
+    return data;
+};
+
+exports.clamp = function (num, minParam, maxParam) {
     let min = minParam;
     let max = maxParam;
     if (min == null) min = num;
@@ -1395,18 +2050,22 @@ exports.clamp = (num, minParam, maxParam) => {
     return Math.min(Math.max(num, min), max);
 };
 
-exports.toBoolean = (str) => {
+exports.noBlock = function (str) {
+    return ` \`\`\`\n${str}\n\`\`\`\n `;
+};
+
+exports.toBoolean = function (str) {
     const result = (typeof (str) === 'boolean' ? str : (str === 'true' || (str === 'false' ? false : undefined)));
     return result;
 };
 
-exports.getNum = (str, min, max) => {
+exports.getNum = function (str, min, max) {
     const num = Number(str);
     if (isNaN(num)) return undefined;
     return exports.clamp(num, min, max);
 };
 
-exports.getInt = (str, min, max) => {
+exports.getInt = function (str, min, max) {
     const num = parseInt(str, 10); // Number() is better generally
     if (isNaN(num)) return undefined;
     return exports.clamp(num, min, max);
@@ -1420,7 +2079,7 @@ exports.getTextChannels = guild => guild.channels.filter(exports.isTextChannel);
 
 exports.getVoiceChannels = guild => guild.channels.filter(exports.isVoiceChannel);
 
-exports.findChannel = (nameParam, guild) => {
+exports.findChannel = function (nameParam, guild) {
     if (guild == null) return undefined;
 
     let name = nameParam;
@@ -1430,7 +2089,7 @@ exports.findChannel = (nameParam, guild) => {
     return channels.find(nowChannel => nowChannel.id === name || nowChannel.name.toLowerCase() === name);
 };
 
-exports.findVoiceChannel = (nameParam, guild) => {
+exports.findVoiceChannel = function (nameParam, guild) {
     if (guild == null) return undefined;
 
     let name = nameParam;
@@ -1440,20 +2099,41 @@ exports.findVoiceChannel = (nameParam, guild) => {
     return channels.find(nowChannel => nowChannel.id === name || nowChannel.name.toLowerCase() === name);
 };
 
-exports.getRole = (nameParam, obj) => {
+exports.isAdmin = function (member) {
+    const highestRole = member.highestRole;
+    const guildRolesFromTop = exports.getGuildRoles(member.guild);
+
+    for (let i = 0; i < guildRolesFromTop.length; i++) {
+        const role = guildRolesFromTop[i];
+        if (/\bmod/g.test(role.name.toLowerCase())) {
+            return false;
+        } else if (role.id == highestRole.id) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+exports.getRole = function (name, obj) {
     if (obj == null) return undefined;
 
-    let name = nameParam;
-
     name = name.toLowerCase();
+
     const nameId = exports.getSafeId(name);
     const roles = obj.roles;
-    return roles.find(role => (role.name.toLowerCase().includes(name) || role.id === nameId));
+    if (roles.has(nameId)) return roles.get(nameId);
+
+    let returnRole = exports.getBestMatch(roles, 'name', name);
+    if (!returnRole && name == 'support') returnRole = exports.getRole('helper ghoul', obj);
+    if (!returnRole && name == 'trial support') returnRole = exports.getRole('helper ghoul in training', obj);
+
+    return returnRole;
 };
 
 exports.getHighestRole = member => member.highestRole;
 
-exports.getPosition = (speaker) => {
+exports.getPosition = function (speaker) {
     if (speaker == null || !exports.isObject(speaker) || speaker.guild == null) return undefined;
 
     if (speaker.id === speaker.guild.ownerID) return 999999999;
@@ -1463,22 +2143,22 @@ exports.getPosition = (speaker) => {
 
 exports.getUserById = id => client.users.get(id);
 
-exports.getUserByName = name => exports.searchUserPartial(client.users, name);
+exports.getUserByName = name => exports.getBestMatch(client.users, 'username', name);
 
-exports.getUserByMixed = (name) => {
+exports.getUserByMixed = function (name) {
     let user = exports.getUserById(name);
     if (user == null) user = exports.getUserByName(name);
     return user;
 };
 
-exports.getMemberByMixed = (name, guild) => {
+exports.getMemberByMixed = function (name, guild) {
     if (guild == null) return undefined;
     let targetMember = exports.getMemberById(name, guild);
     if (targetMember == null) targetMember = exports.getMemberByName(name, guild);
     return targetMember;
 };
 
-exports.getMemberOrRoleByMixed = (name, guild) => {
+exports.getMemberOrRoleByMixed = function (name, guild) {
     if (guild == null) return undefined;
     let targetObj = exports.getRole(name, guild);
     if (targetObj == null) targetObj = exports.getMemberById(name, guild);
@@ -1486,13 +2166,13 @@ exports.getMemberOrRoleByMixed = (name, guild) => {
     return targetObj;
 };
 
-exports.getEitherByMixed = (name, guild) => {
+exports.getEitherByMixed = function (name, guild) {
     let user = exports.getMemberByMixed(name, guild);
     if (user == null) user = exports.getUserByMixed(name);
     return user;
 };
 
-exports.permEnabled = (iPerms, permName) => {
+exports.permEnabled = function (iPerms, permName) {
     const allowGeneral = iPerms.General;
     const allowText = iPerms.Text;
     const allowVoice = iPerms.Voice;
@@ -1504,7 +2184,22 @@ exports.permEnabled = (iPerms, permName) => {
     return undefined;
 };
 
-exports.getPermRating = (guild, userOrRole) => {
+exports.getRolePermissions = function (role, channel) {
+    const outPerms = [];
+
+    if (!channel) {
+        for (let i = 0; i < exports.rolePermissions.length; i++) {
+            const permName = exports.rolePermissions[i];
+            if (role.hasPermission(permName)) {
+                outPerms.push(permName);
+            }
+        }
+    }
+
+    return outPerms;
+};
+
+exports.getPermRating = function (guild, userOrRole) {
     if (userOrRole.hasPermission == null) return 0;
 
     const tempPermRating = exports.cloneObj(exports.permRating);
@@ -1523,7 +2218,7 @@ exports.getPermRating = (guild, userOrRole) => {
                 let pointer1 = i + 1;
                 let newVal = 5;
 
-                // console.log("found", permData[0]);
+                // Util.log("found", permData[0]);
 
                 for (let i2 = i + 1; i2 < tempPermRating.length; i2++) {
                     const nowVal = tempPermRating[i2][1];
@@ -1547,7 +2242,7 @@ exports.getPermRating = (guild, userOrRole) => {
                     tempPermRating[n][1] = newVal;
                 }
 
-                // console.log(tempPermRating);
+                // Util.log(tempPermRating);
             }
             total += permData[1];
         }
@@ -1558,7 +2253,7 @@ exports.getPermRating = (guild, userOrRole) => {
     return total;
 };
 
-exports.getMemberPowers = (guild) => {
+exports.getMemberPowers = function (guild) {
     const sorted = [];
     const members = guild.members;
     for (let i = 0; i < members.size; i++) {
@@ -1573,7 +2268,7 @@ exports.getMemberPowers = (guild) => {
     return sorted;
 };
 
-exports.strToPerm = (strParam) => {
+exports.strToPerm = function (strParam) {
     let str = strParam;
 
     str = exports.replaceAll(str.toUpperCase(), ' ', '_');
@@ -1593,13 +2288,13 @@ exports.strToPerm = (strParam) => {
     return matchPerm;
 };
 
-exports.setChannelPerms = (channel, userOrRole, newPerms) => {
+exports.setChannelPerms = function (channel, userOrRole, newPerms) {
     channel.overwritePermissions(userOrRole, newPerms)
-    .catch(error => console.log(`\n[E_SetChannelPerms] ${error}`));
+        .catch(error => Util.log(`[E_SetChannelPerms] ${error}`));
 };
 
 // fetch more messages just like Discord client does
-exports.fetchMessagesEx = (channel, left, store, lastParam) => {
+exports.fetchMessagesEx = function (channel, left, store, lastParam) {
     // message cache is sorted on insertion
     // channel.messages[0] will get oldest message
     let last = lastParam;
@@ -1609,7 +2304,147 @@ exports.fetchMessagesEx = (channel, left, store, lastParam) => {
         .then(messages => exports.onFetch(messages, channel, left, store));
 };
 
-exports.onFetch = (messagesParam, channel, leftParam, store) => {
+function mirrorProperties(member) {
+    const memberProto = Object.getPrototypeOf(member);
+    const userProto = Object.getPrototypeOf(member.user);
+    for (const key in member.user) {
+        if (!Object.getOwnPropertyDescriptor(memberProto, key)) {
+            Object.defineProperty(memberProto, key, {
+                get() {
+                    return this.user[key];
+                },
+                set(val) {
+                    this.user[key] = val;
+                },
+            });
+        }
+    }
+    const descriptors = Object.getOwnPropertyDescriptors(userProto);
+    for (const key in descriptors) {
+        if (!Object.getOwnPropertyDescriptor(memberProto, key)) {
+            Object.defineProperty(memberProto, key, {
+                get() {
+                    return this.user[key];
+                },
+                set(val) {
+                    this.user[key] = val;
+                },
+            });
+        }
+    }
+}
+
+exports.mergeUser = function (member) {
+    // Util.log('Adding new proxy:');
+    // Util.log(`Adding proxy to ${String(member)}`);
+
+    /* const oldPrototype = Object.getPrototypeOf(member);
+
+    if (Reflect.has(oldPrototype, 'proxyId')) return false;
+
+    const nowProxyId = proxyId++;
+
+    const userProxy = new Proxy({ proxyId: nowProxyId }, {
+        get(storage, prop) {
+            Util.log(`Getting ${prop} from ${nowProxyId}`);
+            if (Reflect.has(member, prop)) return Reflect.get(member, prop);
+            else if (Reflect.has(oldPrototype, prop)) return Reflect.get(oldPrototype, prop, member);
+            else if (Reflect.has(member.user, prop)) return Reflect.get(member.user, prop);
+            return storage[prop];
+        },
+        set(storage, prop, val) {
+            Util.logc('Setter', 'Setting', prop, 'to', val);
+            Reflect.set(member, prop, val); // Could 1st arg be oldPrototype and 4th be member?
+            return val;
+        },
+        getPrototypeOf() {
+            return Reflect.getPrototypeOf(member);
+        },
+    });
+    
+    Object.setPrototypeOf(member, userProxy); */
+
+    mirrorProperties(member);
+
+    return true;
+};
+
+exports.resolveMention = function (userResolvable) {
+    if (userResolvable == null) return undefined;
+    if (typeof user === 'string') return `<@${userResolvable}>`;
+    return `${Util.getMostName(userResolvable)} (${userResolvable.toString()})`;
+};
+
+exports.fieldsToDesc = function (fields) {
+    return `​\n${fields.filter(fieldData => fieldData.name != null).map(fieldData => `**${fieldData.name}${fieldData.value != null ? ': ' : ''}**${fieldData.value != null ? fieldData.value : ''}`).join('\n\n')}`;
+};
+
+exports.resolveUser = function (guild, userResolvable, canBeSystem) { // If user can be system, userResolvable as text would be the bot/system
+    if (userResolvable == null) return undefined;
+
+    const resolvedData = {
+        member: userResolvable,
+        user: userResolvable,
+        id: userResolvable,
+        mention: userResolvable,
+        original: userResolvable,
+    };
+
+    let userType = 0; // Member
+    let system = false;
+
+    let wasId = false;
+
+    if (typeof userResolvable === 'string') {
+        const idMatch = exports.isId(userResolvable);
+        if (idMatch) {
+            userType = 1; // ID
+            resolvedData.id = idMatch;
+        } else {
+            userType = 2; // Name or System
+            system = canBeSystem && userResolvable.match(/[a-z]/i); // When resolving with system possibility the only use of text should be when the moderator is the system.
+        }
+    }
+
+    exports.logc('Admin1', `User type: ${userType} (canBeSystem ${canBeSystem || false})`);
+
+    if (userType === 0) { // Member or User
+        if (!userResolvable.guild) resolvedData.member = guild.members.get(resolvedData.user.id); // User
+        else resolvedData.user = resolvedData.member.user; // Member
+        resolvedData.id = resolvedData.user.id;
+        resolvedData.mention = exports.resolveMention(resolvedData.member || resolvedData.user);
+    } else if (userType === 1) { // Contained ID
+        resolvedData.member = guild.members.get(resolvedData.id);
+        resolvedData.user = resolvedData.member ? resolvedData.member.user : client.users.get(resolvedData.id);
+        if (!resolvedData.user) { // Could be a name imitating an ID
+            wasId = true;
+            userType = 2;
+        } else {
+            resolvedData.mention = exports.resolveMention(resolvedData.member || resolvedData.user);
+        }
+    }
+
+    if (userType === 2) { // Name or System (Separate if statement for branching from userType_1)
+        if (system) { // VaeBot
+            resolvedData.member = guild.members.get(selfId);
+            resolvedData.user = resolvedData.member.user;
+            resolvedData.id = selfId;
+        } else { // Name
+            resolvedData.member = exports.getMemberByMixed(userResolvable, guild);
+            resolvedData.user = resolvedData.member ? resolvedData.member.user : exports.getUserByName(userResolvable);
+            if (resolvedData.user) {
+                resolvedData.id = resolvedData.user.id;
+                resolvedData.mention = exports.resolveMention(resolvedData.member || resolvedData.user);
+            } else if (!wasId) { // Didn't branch from id
+                return 'User not found'; // No user or member
+            }
+        }
+    }
+
+    return resolvedData; // [Definite Values] ID: Always | Mention: Always | Member/User: All inputs except ID and Name
+};
+
+exports.onFetch = function (messagesParam, channel, leftParam, store) {
     let messages = messagesParam;
     let left = leftParam;
 
@@ -1623,22 +2458,130 @@ exports.onFetch = (messagesParam, channel, leftParam, store) => {
 
     left -= messages.length;
 
-    console.log(`Received ${messages.length}, left: ${left}`);
+    Util.log(`Received ${messages.length}, left: ${left}`);
 
     if (left <= 0) return Promise.resolve();
 
     return exports.fetchMessagesEx(channel, left, store, messages[messages.length - 1]);
 };
 
-exports.updateMessageCache = (channel, speaker) => {
+exports.updateMessageCache = function (channel, speaker) {
     exports.fetchMessagesEx(channel, 100, [], channel.messages[0]).then(() => {
         if (speaker) {
-            exports.sendDescEmbed(channel, 'Message Cache', 'Refreshed', exports.makeEmbedFooter(speaker), null, 0x00E676);
+            exports.sendDescEmbed(channel, 'Message Cache', 'Refreshed', exports.makeEmbedFooter(speaker), null, colGreen);
         }
     });
 };
 
-exports.banMember = (member, moderator, reason) => {
+exports.isMember = function (userRes) {
+    if (userRes.user != null) return true;
+    return false;
+};
+
+exports.getUser = function (userRes) {
+    if (!userRes) return null;
+    return userRes.user || userRes;
+};
+
+exports.isMap = function (obj) {
+    return obj instanceof Map;
+};
+
+exports.arrayToCollection = function (arr) {
+    const newCol = new Discord.Collection();
+    for (let i = 0; i < arr.length; i++) {
+        const value = arr[i];
+        newCol.set(value.id, value);
+    }
+    return newCol;
+};
+
+exports.chunkObj = function (obj, chunkSize) {
+    const chunks = [];
+    if (exports.isMap(obj)) {
+        const objArray = obj.array();
+        const size = obj.size;
+        for (let i = 0; i < size; i += chunkSize) {
+            const chunkArr = objArray.slice(i, i + chunkSize);
+            const chunk = exports.arrayToCollection(chunkArr);
+            chunks.push(chunk);
+        }
+    } else {
+        const size = obj.length;
+        for (let i = 0; i < size; i += chunkSize) {
+            const chunk = obj.slice(i, i + chunkSize);
+            chunks.push(chunk);
+        }
+    }
+    return chunks;
+};
+
+exports.deleteMessages = function (messages) {
+    let numMessages;
+    let firstMessage;
+
+    if (exports.isMap(messages)) {
+        numMessages = messages.size;
+        firstMessage = messages.first();
+    } else {
+        numMessages = messages.length;
+        firstMessage = messages[0];
+    }
+
+    if (numMessages < 1) {
+        Util.log('You must have at least 1 message to delete');
+    } else {
+        Util.log(`Deleting ${numMessages} messages`);
+    }
+
+    if (numMessages == 1) {
+        firstMessage.delete()
+            .catch((err) => {
+                Util.log(`[E_DeleteMessages1] ${err}`);
+            });
+    } else {
+        const chunks = exports.chunkObj(messages, 99);
+        for (let i = 0; i < chunks.length; i++) {
+            const chunk = chunks[i];
+            firstMessage.channel.bulkDelete(chunk)
+                .catch((err) => {
+                    Util.log(`[E_DeleteMessages2] ${err}`);
+                });
+        }
+    }
+};
+
+async function fetchMessagesInner(channel, remaining, foundMessages, lastMessage) {
+    lastMessage = lastMessage != null ? lastMessage.id : undefined;
+
+    const messages = await channel.fetchMessages({ limit: Math.min(remaining, 99), before: lastMessage });
+
+    if (!messages || messages.size == 0) return foundMessages;
+
+    const messagesArr = messages.array();
+
+    for (let i = 0; i < messagesArr.length; i++) {
+        foundMessages.push(messagesArr[i]);
+    }
+
+    remaining -= messagesArr.length;
+
+    if (remaining <= 0) return foundMessages;
+
+    return fetchMessagesInner(channel, remaining, foundMessages, messagesArr[messagesArr.length - 1]);
+}
+
+exports.fetchMessages = async function (channel, numScan, checkFunc) {
+    if (!checkFunc) checkFunc = (() => true);
+
+    const scanMessages = await fetchMessagesInner(channel, numScan, [], null);
+    const foundMessages = scanMessages.filter(checkFunc);
+    Util.log(`Num Messages Found: ${foundMessages.length}`);
+    return foundMessages;
+};
+
+exports.banMember = function (member, moderator, reason, tempEnd) {
+    const guild = member.guild;
     const memberId = member.id;
     const memberMostName = exports.getMostName(member);
 
@@ -1647,17 +2590,40 @@ exports.banMember = (member, moderator, reason) => {
     let modFullName = moderator;
     if (exports.isObject(moderator)) modFullName = exports.getFullName(moderator);
 
-    member.ban()
-    .catch(console.error);
+    const linkedGuilds = Data.getLinkedGuilds(member.guild);
+
+    for (let i = 0; i < linkedGuilds.length; i++) {
+        const linkedGuild = linkedGuilds[i];
+        linkedGuild.ban(member.id, { days: 0, reason })
+            .then((userResolvable) => {
+                Util.logc('AddBan1', `Link-added ban for ${exports.getMention(userResolvable, true)} @ ${linkedGuild.name}`);
+            })
+            .catch(exports.logErr);
+    }
+
+    const sendLogData = [
+        `Guild ${tempEnd ? 'Temporary ' : ''}Ban`,
+        guild,
+        member,
+        { name: 'Username', value: member.toString() },
+        { name: 'Moderator', value: member.toString() },
+        { name: 'Ban Reason', value: reason },
+    ];
+
+    if (tempEnd) sendLogData.push({ name: 'Ban Ends', value: tempEnd });
+
+    exports.sendLog(sendLogData, colAction);
 
     Trello.addCard(member.guild, 'Bans', memberMostName, {
         'User ID': memberId,
         'Moderator': modFullName,
-        'Reason': reason,
+        'Reason': `[TempBan] ${reason}`,
     });
+
+    return true;
 };
 
-exports.kickMember = (member, moderator, reason) => {
+exports.kickMember = function (member, moderator, reason) {
     const memberId = member.id;
     const memberMostName = exports.getMostName(member);
 
@@ -1667,11 +2633,258 @@ exports.kickMember = (member, moderator, reason) => {
     if (exports.isObject(moderator)) modFullName = exports.getFullName(moderator);
 
     member.kick()
-    .catch(console.error);
+        .catch(console.error);
 
     Trello.addCard(member.guild, 'Kicks', memberMostName, {
         'User ID': memberId,
         'Moderator': modFullName,
         'Reason': reason,
     });
+};
+
+exports.getChanges = function (str1, str2) {
+    const len1 = str1.length;
+    const len2 = str2.length;
+    const matrix = []; // len1+1, len2+1
+
+    if (len1 == 0) {
+        return len2;
+    } else if (len2 == 0) {
+        return len1;
+    } else if (str1 == str2) {
+        return 0;
+    }
+
+    for (let i = 0; i <= len1; i++) {
+        matrix[i] = {};
+        matrix[i][0] = i;
+    }
+
+    for (let j = 0; j <= len2; j++) {
+        matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= len1; i++) {
+        for (let j = 1; j <= len2; j++) {
+            let cost = 1;
+
+            if (str1[i - 1] == str2[j - 1]) {
+                cost = 0;
+            }
+
+            matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
+        }
+    }
+
+    return matrix[len1][len2];
+};
+
+exports.getLines = function (str) {
+    return str.split(/\r\n|\r|\n/);
+};
+
+exports.getLines2 = function (str) {
+    return exports.chunkString(str, 153); // Take 153 characters as average line length on average 1080p window
+};
+
+exports.simplifyStr = function (str) {
+    str = str.toLowerCase();
+    const strLength = str.length;
+    const midPoint = (str.length / 2) + 1;
+    for (let i = 1; i < midPoint; i++) { // Increment for number of characters in the string stopping before the last (no need to check if whole string is a repetition of itself)
+        const sub = str.substr(0, i); // Get the substring from start of length i
+        const num = Math.floor(strLength / i); // Get the number of times i goes into the length of the substring (number of times to repeat sub to make it fit)
+        const repeatedSub = sub.repeat(num); // Repeat the substring floor(num) times
+        if (repeatedSub == str) return [sub, num]; // If repeatedSub is equal to original string, return substring and repetition count
+    }
+    return [str, 1]; // Return substring and repetition count
+};
+
+exports.simplifyStrHeavy = function (str) {
+    // Assume str is already lowercase
+    str = str.replace(/\s/g, '');
+    const strLength = str.length;
+    const midPoint = (str.length / 2) + 1; // The first int x for which floor(strLength / x) is 1, a.k.a the length when a substring is too large to repeat and fit into str
+    let numCanChange = 0;
+    let nextInc = 2;
+    for (let i = 1; i < midPoint; i++) { // Increments for number of characters in the string stopping before the midpoint
+        const sub = str.substr(0, i); // Get the str substring of length i
+        const num = Math.floor(strLength / i); // Get the number of times i goes into the length of the substring (number of times to repeat sub to make it fit)
+        const repeatedSub = sub.repeat(num); // Repeat the substring num times
+        const nowMaxChanges = Math.min(numCanChange * num, strLength / 2); // Get number of allowed alterations between strings to be classed as similar
+        if (exports.getChanges(repeatedSub, str) <= nowMaxChanges) return [sub, num]; // If repeatedSub is similar to original string, return substring and repetition count
+        if (i >= nextInc) { // Update multiplier for nowMaxChanges when length is large enough
+            numCanChange++;
+            nextInc *= 2;
+        }
+    }
+    return [str, 1]; // Return substring and repetition count
+};
+
+exports.similarStrings = function (str1, str2) {
+    str1 = str1.toLowerCase().trim();
+    str2 = str2.toLowerCase().trim();
+
+    // Get number of allowed alterations between strings to be classed as similar
+    let maxChanges = Math.floor(Math.min(Math.max(Math.max(str1.length, str2.length) / 3, Math.abs(str2.length - str1.length)), 6));
+
+    // Check if the original strings are similar (have a number of alterations between them [levenshtein distance] less/equal to maxChanges)
+    if (exports.getChanges(str1, str2) <= maxChanges) return true;
+
+    // Simplify both strings removing repeated similar data
+    [str1] = exports.simplifyStrHeavy(str1); // Reduce similar repeated strings (e.g. dog1dog2dog3 becomes dog1)
+    [str2] = exports.simplifyStrHeavy(str2);
+
+    // Update maxChanges for new string lengths
+    maxChanges = Math.floor(Math.min(Math.max(Math.max(str1.length, str2.length) / 3, Math.abs(str2.length - str1.length)), 6));
+
+    // Check if simplified strings are similar
+    return exports.getChanges(str1, str2) <= maxChanges;
+};
+
+exports.isSpam = function (content) {
+    if (exports.getLines2(content).length >= 500) return true; // If the message contains too many chunk-lines (so characters) consider it spam
+
+    const strLines = exports.getLines(content);
+
+    if (strLines.length > 1) {
+        let numSimilar = 0;
+        let mostCommon = strLines[0];
+        let numLines = strLines.length;
+
+        for (let i = 1; i < strLines.length; i++) {
+            const nowStr = strLines[i];
+            if (nowStr.trim().length < 1) {
+                numLines--;
+                continue;
+            }
+            const compStr = numSimilar === 0 ? strLines[i - 1] : mostCommon;
+            if (exports.similarStrings(nowStr, compStr)) {
+                if (numSimilar === 0) mostCommon = nowStr;
+                numSimilar++;
+            } else if (i === 2 && numSimilar === 0 && exports.similarStrings(nowStr, mostCommon)) {
+                numSimilar++;
+            }
+        }
+
+        if (numSimilar >= 3 || numSimilar == numLines) return true;
+    }
+
+    // ////////////////////////////////////////////////////////////////////////////////////////
+
+    const pattern = /\S+/g; // Pattern for finding all matches for continuous substrings of non space characters
+    const matches = content.match(pattern); // Get the matches
+
+    for (let i = 0; i < matches.length; i++) { // Iterate through the matches
+        // Util.log(`---${i + 1}---`);
+        for (let j = 0; j < matches.length; j++) { // Iterate through the matches again in each iteration for concatenating multiple adjacent matches
+            let long = matches[j]; // Get the substring on non space characters
+            if (j + i >= matches.length) continue; // If there isn't a match at index j+i it can't be concatenated to joined-substring so skip
+            for (let k = 1; k <= i; k++) long += matches[j + k]; // Concatenate all matches after the one at j, onto the match at j, up until (inclusive) the match at i
+            // Util.log(long);
+            const [sub, num] = exports.simplifyStr(long); // Simplify the resultant concatenated substring that is made up of the match at j and the following matched substrings, to see if it consists of one repeated substring
+            // sub: The substring that can be repeated to make up the long var
+            // num: The number of times the substring needs to be repeated to make up the long var
+            const subLength = sub.length; // The number of characters in the repeated substring
+            let triggered = false; // Initialise spam detection variable
+            if (num >= 3) { // Only check for spam if substring has been repeated at least 3 times
+                if (subLength == 1) { // 1 character in substring, 100+ repetitions
+                    if (num >= 100) triggered = true; // Is spam
+                } else if (subLength == 2) { // 2 characters in substring, 20+ repetitions
+                    if (num >= 20) triggered = true; // Is spam
+                } else if (subLength == 3) { // 3 characters in substring, 7+ repetitions
+                    if (num >= 7) triggered = true; // Is spam
+                } else if (subLength <= 5) { // 4-5 characters in substring, 4+ repetitions
+                    if (num >= 4) triggered = true; // Is spam
+                } else { // 6+ characters in substring, 3+ repetitions
+                    triggered = true; // Is spam
+                }
+            }
+            if (triggered) { // If it was counted as spam
+                Util.log(long, ':', sub, ':', num);
+                return true; // Return true (spam)
+            }
+        }
+    }
+
+    return false; // Return false (not spam)
+};
+
+exports.reverse = function (str) {
+    return str.split('').reverse().join('');
+};
+
+let lastTag = null;
+let lastWasEmpty = true;
+
+function postOutString(args, startNewline) {
+    const nowDate = new Date();
+    nowDate.setHours(nowDate.getHours() + 1);
+
+    let out = (startNewline && !lastWasEmpty) ? '\n' : '';
+    out += NodeUtil.format(...args);
+
+    let outIndex = out.search(/[^\n\r]/g);
+    if (outIndex === -1) outIndex = 0;
+
+    out = out.slice(0, outIndex) + DateFormat(nowDate, '| dd/mm/yyyy | HH:MM | ') + out.slice(outIndex);
+
+    console.log(out);
+
+    lastWasEmpty = /[\n\r]\s*$/.test(out);
+}
+
+exports.log = function (...args) {
+    postOutString(args, true);
+    lastTag = null;
+};
+
+exports.logc = function (...args) {
+    const nowTag = String(args.splice(0, 1)).toLowerCase();
+    const isNew = lastTag != nowTag;
+    postOutString(args, isNew);
+    lastTag = nowTag;
+};
+
+exports.logn = function (...args) {
+    postOutString(args, false);
+    lastTag = null;
+};
+
+exports.logErr = function (...args) {
+    args.unshift('[ERROR]');
+    postOutString(args, true);
+    lastTag = null;
+};
+
+const getAuditLogChunk = 1;
+const getAuditLogMax = 4; // This is completely pointless ...?
+
+async function getAuditLogRec(guild, auditLogOptions, userData, checkedLogs) {
+    if (checkedLogs.length >= getAuditLogMax) return null;
+    const entries = (await guild.fetchAuditLogs(auditLogOptions)).entries;
+    const outLog = entries.find(log => userData.nowTimestamp - log.createdTimestamp < userData.maxElapsed && log.target.id === userData.target.id); // Needs to check latest first
+    if (outLog) return outLog;
+    entries.forEach((log) => { if (!checkedLogs.includes(log.id)) checkedLogs.push(log.id); });
+    auditLogOptions.limit++;
+    userData.maxElapsed += 700;
+    return getAuditLogRec(guild, auditLogOptions, userData, checkedLogs);
+}
+
+exports.getAuditLog = async function (guild, type, userData) {
+    userData.executor = Util.resolveUser(guild, userData.executor);
+
+    if (!userData.target) {
+        const auditLogOptions = { type, user: userData.executor, limit: 1 };
+        return (await guild.fetchAuditLogs(auditLogOptions)).entries.first();
+    }
+
+    userData.target = Util.resolveUser(guild, userData.target);
+    userData.maxElapsed = userData.maxElapsed || 3000;
+
+    const nowTimestamp = +new Date();
+    userData.nowTimestamp = nowTimestamp;
+
+    const auditLogOptions = { type, user: userData.executor, limit: getAuditLogChunk };
+    return getAuditLogRec(guild, auditLogOptions, userData, []);
 };

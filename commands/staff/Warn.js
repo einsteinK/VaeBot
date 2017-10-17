@@ -6,17 +6,38 @@ module.exports = Cmds.addCommand({
         loud: false,
     },
 
-    desc: 'Mute a user (in all guild channels) for 0.5 hours, without putting it on their record',
+    desc: 'Warns a user and puts the warning on their record',
 
-    args: '([@user] | [id] | [name]) ([reason])',
+    args: '([@user] | [id] | [name]) (OPT: [reason])',
 
-    example: 'vae being weird',
+    example: 'vae spamming the chat',
 
     // /////////////////////////////////////////////////////////////////////////////////////////
 
     func: (cmd, args, msgObj, speaker, channel, guild) => {
-        const position = Util.getPosition(speaker);
+        args = args.trim();
 
-        Mutes.doMuteName(args, guild, position, channel, speaker, true);
+        const data = Util.getDataFromString(args,
+            [
+                [
+                    function (str) {
+                        return Util.getMemberByMixed(str, guild) || Util.isId(str);
+                    },
+                ],
+            ]
+        , true);
+
+        if (!data) {
+            return Util.sendEmbed(channel, 'Warn Failed', 'User not found', Util.makeEmbedFooter(speaker), null, colGreen, null);
+        }
+
+        Util.log(`Change Arg Data: ${data}`);
+
+        const member = data[0];
+        const reason = data[1];
+
+        Admin.addWarning(guild, channel, member, speaker, reason);
+
+        return true;
     },
 });

@@ -51,8 +51,8 @@ module.exports = Cmds.addCommand({
             return Util.commandFailed(channel, speaker, 'Invalid parameters: Event not provided');
         }
 
-        console.log(event);
-        console.log(actions);
+        Util.log(event);
+        Util.log(actions);
 
         for (let i = 0; i < event.length; i++) {
             const eventName = event[i];
@@ -74,7 +74,7 @@ module.exports = Cmds.addCommand({
                 }
             }
 
-            Util.sendEmbed(channel, 'Removed Link', null, Util.makeEmbedFooter(speaker), null, 0x00E676, sendEmbedFields);
+            Util.sendEmbed(channel, 'Removed Link', null, Util.makeEmbedFooter(speaker), null, colGreen, sendEmbedFields);
         }
     },
 });

@@ -12,12 +12,13 @@ module.exports = Cmds.addCommand({
 
     example: 'vae',
 
-    func: (cmd, args, msgObj, speaker, channel, guild) => {
+    func: async (cmd, args, msgObj, speaker, channel, guild) => {
         const target = Util.getEitherByMixed(args, guild);
         if (target == null) return Util.commandFailed(channel, speaker, 'User not found');
 
-        const isMuted = Mutes.checkMuted(target.id, guild);
-        const historyStr = Util.historyToString(Util.getHistory(target.id, guild));
+        const isMuted = Admin.checkMuted(guild, target.id);
+        const numMutes = await Util.getNumMutes(target.id, guild);
+        const historyStr = `${numMutes} mute${numMutes == 1 ? '' : 's'}`;
 
         const createdAt = target.createdAt || target.user.createdAt;
         // const timeStr = `${Util.getYearStr(createdAt)}-${Util.getMonthStr(createdAt)}-${Util.getDayStr(createdAt)}`;
@@ -56,7 +57,7 @@ module.exports = Cmds.addCommand({
 
         // var newDesc = Util.getAvatar(target, true) // + "\n" + */("+").repeat(numSep);
 
-        Util.sendEmbed(channel, 'User Info', null, Util.makeEmbedFooter(speaker), Util.getAvatar(target), 0x00E676, sendEmbedFields);
+        Util.sendEmbed(channel, 'User Info', null, Util.makeEmbedFooter(speaker), Util.getAvatar(target), colGreen, sendEmbedFields);
 
         return undefined;
     },

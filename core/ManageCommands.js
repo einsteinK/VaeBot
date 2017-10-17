@@ -57,11 +57,11 @@ exports.getCommand = function (contentParam) {
 };
 
 exports.initCommands = function () {
-    Util.bulkRequire('./commands/');
+    Util.bulkRequire(`${botDir}/commands/`);
 };
 
 exports.checkMessage = (msgObj, speaker, channel, guild, content, contentLower, authorId, isStaff) => {
-    if ((channel.id !== '168743219788644352' || authorId === vaebId)/* && (guild.id != "257235915498323969" || channel.id == "257244216772526092")*/) { // script-builders
+    if ((channel.id !== '168743219788644352' || authorId === vaebId)/* && (guild.id != "257235915498323969" || channel.id == "257244216772526092") */) { // script-builders
         for (let i = 0; i < exports.commands.length; i++) {
             const cmdData = exports.commands[i];
             const cmdNames = cmdData[0];
@@ -74,20 +74,21 @@ exports.checkMessage = (msgObj, speaker, channel, guild, content, contentLower, 
                 const hasParameters = cmd[cmdLength - 1] === ' ';
                 if ((hasParameters && contentLower.substr(0, cmdLength) === cmd) || (!hasParameters && contentLower === cmd)) {
                     if (cmdRequires.staff && !isStaff) {
-                        Util.sendEmbed(channel, 'Restricted', 'This command can only be used by Staff', Util.makeEmbedFooter(speaker), null, 0x00E676, null);
+                        Util.sendEmbed(channel, 'Restricted', 'This command can only be used by Staff', Util.makeEmbedFooter(speaker), null, colGreen, null);
                     } else if (cmdRequires.vaeb && authorId !== vaebId) {
-                        Util.sendEmbed(channel, 'Restricted', 'This command can only be used by Vaeb', Util.makeEmbedFooter(speaker), null, 0x00E676, null);
+                        Util.sendEmbed(channel, 'Restricted', 'This command can only be used by Vaeb', Util.makeEmbedFooter(speaker), null, colGreen, null);
                     } else if (cmdRequires.guild && guild == null) {
-                        Util.sendEmbed(channel, 'Restricted', 'This command can only be used in Guilds', Util.makeEmbedFooter(speaker), null, 0x00E676, null);
+                        Util.sendEmbed(channel, 'Restricted', 'This command can only be used in Guilds', Util.makeEmbedFooter(speaker), null, colGreen, null);
                     } else if (cmdRequires.loud && isQuiet(channel, speaker)) {
                         Util.sendEmbed(channel, 'Quiet Channel', 'This command cannot be used in this Channel (use #bot-commands)',
-                          Util.makeEmbedFooter(speaker), null, 0x00E676, null);
+                            Util.makeEmbedFooter(speaker), null, colGreen, null);
                     } else {
                         const args = content.substring(cmdLength);
                         const argStr = args.length < 1 ? 'None' : args;
-                        let outLog = `\n> ${Util.getName(speaker)} (${speaker.id}) | ${channel.name} (${channel.id}) | ${guild.name} (${guild.id})\n    Command Executed: ${cmd.trim()}`;
+                        const guildData = guild != null ? `${guild.name} (${guild.id})` : 'NoGuild';
+                        let outLog = `\n> ${Util.getName(speaker)} (${speaker.id}) | ${channel.name} (${channel.id}) | ${guildData}\n    Command Executed: ${cmd.trim()}`;
                         if (hasParameters) outLog += ` | Arguments: ${argStr}`;
-                        console.log(outLog);
+                        Util.log(outLog);
 
                         if (cmdRequires.staff && guild != null) {
                             const sendLogData = [
@@ -111,7 +112,7 @@ exports.checkMessage = (msgObj, speaker, channel, guild, content, contentLower, 
                         try {
                             cmdFunc(cmd, args, msgObj, speaker, channel, guild, isStaff);
                         } catch (err) {
-                            console.log(`COMMAND ERROR: ${err.stack}`);
+                            Util.log(`COMMAND ERROR: ${err.stack}`);
                         }
                     }
 

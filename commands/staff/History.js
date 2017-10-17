@@ -1,70 +1,57 @@
 module.exports = Cmds.addCommand({
-    cmds: [";history", ";mutehistory"],
+    cmds: [';history', ';mutehistory'],
 
     requires: {
         guild: true,
-        loud: false
+        loud: false,
     },
 
-    desc: "Get all users with mute history",
+    desc: 'Get all users with mute history',
 
-    args: "",
+    args: '',
 
-    example: "",
+    example: '',
 
-    ///////////////////////////////////////////////////////////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////////////////////
 
-    func: (cmd, args, msgObj, speaker, channel, guild) => {
-        //var botUser = Util.getMemberById(selfId, guild);
+    func: async (cmd, args, msgObj, speaker, channel, guild) => {
+        const sendEmbedFields = [];
 
-        var sendEmbedFields = [];
+        const allMutes = await Data.getRecords(guild, 'mutes');
 
-        var historyGuild = Data.guildGet(guild, Data.history);
+        const numMutesKeys = {};
+        const numMutesArr = [];
 
-        var numElements = 0;
-        var numFound = 0;
+        const splitMutesKeys = {};
+        const splitMutesArr = [];
 
-        for (let targetId in historyGuild) {
-            if (historyGuild.hasOwnProperty(targetId)) ++numElements;
+        for (let i = 0; i < allMutes.length; i++) {
+            const record = allMutes[i];
+            const userId = record.user_id;
+            if (!has.call(numMutesKeys, userId)) numMutesKeys[userId] = numMutesArr.push([`<@${userId}>`, 0]) - 1;
+            ++numMutesArr[numMutesKeys[userId]][1];
         }
 
-        var nowTime = Mutes.defaultMuteLength;
-        var iterations = 0;
-
-        while (numFound < numElements) {
-            var nowFound = [];
-
-            //console.log(numFound + "_" + numElements + "NOW: " + nowTime);
-
-            for (let targetId in historyGuild) {
-                if (historyGuild.hasOwnProperty(targetId)) {
-                    var userName = historyGuild[targetId][1];
-                    var userTime = historyGuild[targetId][0];
-
-                    //console.log(userTime);
-
-                    if (userTime == nowTime) {
-                        ++numFound;
-                        var targMention = "<@" + targetId + ">";
-                        nowFound.push(targMention);
-                    }
-                }
+        for (let i = 0; i < numMutesArr.length; i++) {
+            const userMention = numMutesArr[i][0];
+            const numMutes = numMutesArr[i][1];
+            if (!has.call(splitMutesKeys, numMutes)) {
+                const chunk = [];
+                chunk.numMutes = numMutes;
+                splitMutesKeys[numMutes] = splitMutesArr.push(chunk) - 1;
             }
-
-            if (nowFound.length > 0) {
-                var timeStr = Util.historyToString(nowTime);
-                var nowValue = "​\n" + nowFound.join("\n\n\n") + "\n​";
-                sendEmbedFields.push({name: timeStr, value: nowValue, inline: false});
-            }
-
-            nowTime = nowTime*2;
-            ++iterations;
-            if (iterations > 100) {
-                Util.print(channel, "[ERROR] History formatting timed out");
-                return;
-            }
+            splitMutesArr[splitMutesKeys[numMutes]].push(userMention);
         }
-        
-        Util.sendEmbed(channel, "Mute History", null, Util.makeEmbedFooter(speaker), null, 0x00BCD4, sendEmbedFields);
-    }
+
+        splitMutesArr.sort((a, b) => a.numMutes - b.numMutes);
+
+        for (let i = 0; i < splitMutesArr.length; i++) {
+            const splitMutesChunk = splitMutesArr[i];
+            const numMutes = splitMutesChunk.numMutes;
+            sendEmbedFields.push({ name: `${numMutes} Mute${numMutes == 1 ? '' : 's'}`, value: splitMutesChunk.join('\n'), inline: false });
+        }
+
+        Util.sendEmbed(channel, 'Mute History', null, Util.makeEmbedFooter(speaker), null, colBlue, sendEmbedFields);
+    },
 });
+

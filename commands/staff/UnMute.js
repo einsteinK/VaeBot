@@ -8,13 +8,15 @@ module.exports = Cmds.addCommand({
 
     desc: 'Unmute a user',
 
-    args: '([@user] | [id] | [name])',
+    args: '([user_resolvable])',
 
     example: 'vae',
 
     // /////////////////////////////////////////////////////////////////////////////////////////
 
     func: (cmd, args, msgObj, speaker, channel, guild) => {
-        Mutes.unMuteName(args, false, guild, Util.getPosition(speaker), channel, speaker);
+        args = args.trim();
+
+        Admin.unMute(guild, channel, args, speaker);
     },
 });
